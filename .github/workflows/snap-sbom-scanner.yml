@@ -64,6 +64,7 @@ jobs:
 
   scan-snaps:
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     needs: prepare
     if: needs.prepare.outputs.matrix-length > 0
     strategy:
