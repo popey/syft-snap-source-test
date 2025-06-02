@@ -1,0 +1,194 @@
+name: Snap SBOM Scanner
+
+on:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '*/10 * * * *'  # Every 10 minutes
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  scan-snaps:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Clone and setup Syft
+      run: |
+        git clone https://github.com/anchore/syft /tmp/syft
+        cd /tmp/syft
+        git checkout add-snap-source
+        make bootstrap
+    
+    - name: Restore cache
+      uses: actions/cache/restore@v3
+      with:
+        path: |
+          cache/finished.txt
+          cache/failed.txt
+        key: snap-scan-cache-v1
+        restore-keys: |
+          snap-scan-cache-
+    
+    - name: Create cache directory
+      run: mkdir -p cache
+    
+    - name: Create sboms directory
+      run: mkdir -p sboms
+    
+    - name: Select snaps to process
+      run: |
+        # Read first 10 lines from names.txt
+        head -n 10 names.txt > snaps_to_process.txt
+        
+        # Remove already finished ones
+        if [ -f cache/finished.txt ]; then
+          grep -v -F -f cache/finished.txt snaps_to_process.txt > snaps_filtered.txt || true
+          mv snaps_filtered.txt snaps_to_process.txt
+        fi
+        
+        # Remove already failed ones
+        if [ -f cache/failed.txt ]; then
+          grep -v -F -f cache/failed.txt snaps_to_process.txt > snaps_filtered.txt || true
+          mv snaps_filtered.txt snaps_to_process.txt
+        fi
+        
+        echo "Snaps to process:"
+        cat snaps_to_process.txt
+    
+    - name: Process snaps
+      run: |
+        cd /tmp/syft
+        export SNAP_COUNT=0
+        
+        while IFS= read -r snap_name; do
+          if [ -z "$snap_name" ]; then
+            continue
+          fi
+          
+          echo "$(date) Processing snap: $snap_name"
+          
+          # Try to generate SBOM
+          if go run ./cmd/syft -v --from snap "$snap_name" -o syft-json="${GITHUB_WORKSPACE}/sboms/${snap_name}-syft.json"; then
+            echo "$(date) Successfully generated SBOM for $snap_name"
+            echo "$snap_name" >> "${GITHUB_WORKSPACE}/cache/finished.txt"
+            echo "$snap_name" >> "${GITHUB_WORKSPACE}/successful_snaps.txt"
+            SNAP_COUNT=$((SNAP_COUNT + 1))
+          else
+            echo "$(date) Failed to generate SBOM for $snap_name"
+            echo "$snap_name" >> "${GITHUB_WORKSPACE}/cache/failed.txt"
+          fi
+          
+        done < "${GITHUB_WORKSPACE}/snaps_to_process.txt"
+        
+        echo "PROCESSED_COUNT=$SNAP_COUNT" >> $GITHUB_ENV
+    
+    - name: Save cache
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          cache/finished.txt
+          cache/failed.txt
+        key: snap-scan-cache-v1
+    
+    - name: Create Pull Requests for successful SBOMs
+      if: env.PROCESSED_COUNT > 0
+      run: |
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Check if we have successful snaps to process
+        if [ ! -f successful_snaps.txt ]; then
+          echo "No successful snaps to create PRs for"
+          exit 0
+        fi
+        
+        while IFS= read -r snap_name; do
+          if [ -z "$snap_name" ]; then
+            continue
+          fi
+          
+          sbom_file="sboms/${snap_name}-syft.json"
+          
+          if [ ! -f "$sbom_file" ]; then
+            echo "SBOM file not found for $snap_name, skipping"
+            continue
+          fi
+          
+          echo "Creating PR for $snap_name"
+          
+          # Create a new branch for this SBOM
+          branch_name="add-sbom-${snap_name}-$(date +%s)"
+          git checkout -b "$branch_name"
+          
+          # Add the SBOM file
+          git add "$sbom_file"
+          git commit -m "Add SBOM for snap: $snap_name"
+          
+          # Push the branch
+          git push origin "$branch_name"
+          
+          # Create pull request using GitHub CLI
+          gh pr create \
+            --title "Add SBOM for snap: $snap_name" \
+            --body "This PR adds the SBOM (Software Bill of Materials) for the snap package: \`$snap_name\`
+          
+          Generated automatically by the snap SBOM scanner workflow.
+          
+          **Snap Name:** $snap_name  
+          **SBOM File:** $sbom_file  
+          **Generated:** $(date)" \
+            --head "$branch_name" \
+            --base main
+          
+          # Switch back to main for next iteration
+          git checkout main
+          
+        done < successful_snaps.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Summary
+      run: |
+        echo "## Snap SBOM Scanner Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f successful_snaps.txt ]; then
+          success_count=$(wc -l < successful_snaps.txt)
+          echo "✅ **Successfully processed:** $success_count snaps" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Successful snaps:**" >> $GITHUB_STEP_SUMMARY
+          while IFS= read -r snap_name; do
+            echo "- $snap_name" >> $GITHUB_STEP_SUMMARY
+          done < successful_snaps.txt
+        else
+          echo "✅ **Successfully processed:** 0 snaps" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Count total finished and failed
+        finished_count=0
+        failed_count=0
+        
+        if [ -f cache/finished.txt ]; then
+          finished_count=$(wc -l < cache/finished.txt)
+        fi
+        
+        if [ -f cache/failed.txt ]; then
+          failed_count=$(wc -l < cache/failed.txt)
+        fi
+        
+        echo "📊 **Overall Statistics:**" >> $GITHUB_STEP_SUMMARY
+        echo "- Total finished: $finished_count" >> $GITHUB_STEP_SUMMARY
+        echo "- Total failed: $failed_count" >> $GITHUB_STEP_SUMMARY
