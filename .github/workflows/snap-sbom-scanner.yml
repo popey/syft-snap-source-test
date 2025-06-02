@@ -9,6 +9,7 @@ permissions:
   contents: write
   pull-requests: write
   actions: write
+  workflows: write
 
 jobs:
   prepare:
@@ -37,19 +38,20 @@ jobs:
     - name: Select snaps to process
       id: select-snaps
       run: |
-        # Read first 10 lines from names.txt
-        head -n 10 names.txt > snaps_to_process.txt
-        
-        # Remove already finished ones
-        if [ -f cache/finished.txt ]; then
-          grep -v -F -f cache/finished.txt snaps_to_process.txt > snaps_filtered.txt || true
-          mv snaps_filtered.txt snaps_to_process.txt
+        # Create combined exclusion list
+        exclusion_file=""
+        if [ -f cache/finished.txt ] || [ -f cache/failed.txt ]; then
+          cat cache/finished.txt cache/failed.txt 2>/dev/null | sort -u > combined_exclusions.txt
+          exclusion_file="combined_exclusions.txt"
         fi
         
-        # Remove already failed ones
-        if [ -f cache/failed.txt ]; then
-          grep -v -F -f cache/failed.txt snaps_to_process.txt > snaps_filtered.txt || true
-          mv snaps_filtered.txt snaps_to_process.txt
+        # Find snaps that haven't been processed yet
+        if [ -n "$exclusion_file" ] && [ -s "$exclusion_file" ]; then
+          # Filter out already processed snaps and take first 10
+          grep -v -F -f "$exclusion_file" names.txt | head -n 10 > snaps_to_process.txt || true
+        else
+          # No exclusions, just take first 10
+          head -n 10 names.txt > snaps_to_process.txt
         fi
         
         # Convert to JSON array for matrix
@@ -63,6 +65,16 @@ jobs:
         cat snaps_to_process.txt
         echo "Matrix JSON: $snaps_json"
         echo "Matrix length: $matrix_length"
+        
+        # Debug info
+        echo "Debug info:"
+        echo "Total snaps in names.txt: $(wc -l < names.txt)"
+        if [ -f cache/finished.txt ]; then
+          echo "Already finished: $(wc -l < cache/finished.txt)"
+        fi
+        if [ -f cache/failed.txt ]; then
+          echo "Already failed: $(wc -l < cache/failed.txt)"
+        fi
 
   scan-snaps:
     runs-on: ubuntu-latest
