@@ -2,8 +2,6 @@ name: Snap SBOM Scanner
 
 on:
   workflow_dispatch:  # Manual trigger
-  schedule:
-    - cron: '*/10 * * * *'  # Every 10 minutes
 
 permissions:
   contents: write
@@ -37,21 +35,9 @@ jobs:
     - name: Select snaps to process
       id: select-snaps
       run: |
-        # Create combined exclusion list
-        exclusion_file=""
-        if [ -f cache/finished.txt ] || [ -f cache/failed.txt ]; then
-          cat cache/finished.txt cache/failed.txt 2>/dev/null | sort -u > combined_exclusions.txt
-          exclusion_file="combined_exclusions.txt"
-        fi
-        
-        # Find snaps that haven't been processed yet
-        if [ -n "$exclusion_file" ] && [ -s "$exclusion_file" ]; then
-          # Filter out already processed snaps and take first 10
-          grep -v -F -f "$exclusion_file" names.txt | head -n 10 > snaps_to_process.txt || true
-        else
-          # No exclusions, just take first 10
-          head -n 10 names.txt > snaps_to_process.txt
-        fi
+        # Simply take the first 20 lines from names.txt
+        # (since processed ones will be removed via PR)
+        head -n 20 names.txt > snaps_to_process.txt
         
         # Convert to JSON array for matrix
         snaps_json=$(jq -R -s -c 'split("\n")[:-1]' snaps_to_process.txt)
@@ -69,10 +55,10 @@ jobs:
         echo "Debug info:"
         echo "Total snaps in names.txt: $(wc -l < names.txt)"
         if [ -f cache/finished.txt ]; then
-          echo "Already finished: $(wc -l < cache/finished.txt)"
+          echo "Total finished (cache): $(wc -l < cache/finished.txt)"
         fi
         if [ -f cache/failed.txt ]; then
-          echo "Already failed: $(wc -l < cache/failed.txt)"
+          echo "Total failed (cache): $(wc -l < cache/failed.txt)"
         fi
 
   scan-snaps:
@@ -208,8 +194,12 @@ jobs:
         path: results/
         pattern: result-*
     
-    - name: Update cache files
+    - name: Update cache files and collect successful snaps
       run: |
+        # Initialize arrays for this run
+        successful_snaps=()
+        failed_snaps=()
+        
         # Process all result files
         for result_dir in results/result-*/; do
           if [ -f "$result_dir/result.txt" ]; then
@@ -217,10 +207,12 @@ jobs:
             if [[ $result_content == SUCCESS:* ]]; then
               snap_name=${result_content#SUCCESS:}
               echo "$snap_name" >> cache/finished.txt
+              successful_snaps+=("$snap_name")
               echo "Added $snap_name to finished.txt"
             elif [[ $result_content == FAILED:* ]]; then
               snap_name=${result_content#FAILED:}
               echo "$snap_name" >> cache/failed.txt
+              failed_snaps+=("$snap_name")
               echo "Added $snap_name to failed.txt"
             fi
           fi
@@ -234,9 +226,86 @@ jobs:
           sort -u cache/failed.txt -o cache/failed.txt
         fi
         
+        # Save successful snaps for PR creation
+        printf '%s\n' "${successful_snaps[@]}" > successful_snaps_this_run.txt
+        
         echo "Updated cache files:"
         echo "Finished count: $(wc -l < cache/finished.txt 2>/dev/null || echo 0)"
         echo "Failed count: $(wc -l < cache/failed.txt 2>/dev/null || echo 0)"
+        echo "Successful this run: ${#successful_snaps[@]}"
+        echo "Failed this run: ${#failed_snaps[@]}"
+    
+    - name: Create PR to update names.txt
+      if: hashFiles('successful_snaps_this_run.txt') != ''
+      run: |
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Check if we have successful snaps to remove
+        if [ ! -s successful_snaps_this_run.txt ]; then
+          echo "No successful snaps to remove from names.txt"
+          exit 0
+        fi
+        
+        echo "Creating PR to remove processed snaps from names.txt"
+        
+        # Create a new branch for updating names.txt
+        branch_name="update-names-$(date +%s)"
+        git checkout -b "$branch_name"
+        
+        # Remove successful snaps from names.txt
+        cp names.txt names_backup.txt
+        while IFS= read -r snap_name; do
+          if [ -n "$snap_name" ]; then
+            # Remove the snap from names.txt (using temporary file to avoid issues)
+            grep -v "^${snap_name}$" names.txt > names_temp.txt || true
+            mv names_temp.txt names.txt
+            echo "Removed $snap_name from names.txt"
+          fi
+        done < successful_snaps_this_run.txt
+        
+        # Check if names.txt actually changed
+        if cmp -s names.txt names_backup.txt; then
+          echo "No changes to names.txt, skipping PR"
+          git checkout main
+          exit 0
+        fi
+        
+        # Count how many snaps were removed
+        original_count=$(wc -l < names_backup.txt)
+        new_count=$(wc -l < names.txt)
+        removed_count=$((original_count - new_count))
+        
+        # Add the updated names.txt
+        git add names.txt
+        git commit -m "Remove $removed_count processed snaps from names.txt
+        
+        Successfully processed snaps removed:
+        $(cat successful_snaps_this_run.txt | sed 's/^/- /')"
+        
+        # Push the branch
+        git push origin "$branch_name"
+        
+        # Create pull request using GitHub CLI
+        gh pr create \
+          --title "Update names.txt - Remove $removed_count processed snaps" \
+          --body "This PR removes $removed_count successfully processed snaps from the names.txt file.
+        
+        **Snaps removed:**
+        $(cat successful_snaps_this_run.txt | sed 's/^/- `/' | sed 's/$/`/')
+        
+        **Before:** $original_count snaps  
+        **After:** $new_count snaps  
+        **Removed:** $removed_count snaps
+        
+        Generated automatically by the snap SBOM scanner workflow." \
+          --head "$branch_name" \
+          --base main
+        
+        echo "Created PR to update names.txt (removed $removed_count snaps)"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Save cache
       uses: actions/cache/save@v3
