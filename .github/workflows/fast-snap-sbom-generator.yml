@@ -108,5 +108,66 @@ jobs:
           echo "snap_name=$snap_name" >> $GITHUB_OUTPUT
           exit 1
         fi
-
-    # ...rest of the workflow remains the same...
+    
+    - name: Create Pull Request
+      if: steps.process-snap.outputs.success == 'true'
+      run: |
+        snap_name="${{ matrix.snap }}"
+        sbom_file="sboms/${snap_name}-syft.json"
+        
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        echo "Creating PR for $snap_name"
+        
+        # Create a new branch for this SBOM
+        branch_name="add-sbom-${snap_name}-$(date +%s)"
+        git checkout -b "$branch_name"
+        
+        # Add the SBOM file
+        git add "$sbom_file"
+        git commit -m "Add SBOM for snap: $snap_name"
+        
+        # Push the branch
+        git push origin "$branch_name"
+        
+        # Create pull request using GitHub CLI
+        gh pr create \
+          --title "Add SBOM for snap: $snap_name" \
+          --body "This PR adds the SBOM (Software Bill of Materials) for the snap package: \`$snap_name\`
+        
+        Generated automatically by the snap SBOM scanner workflow.
+        
+        **Snap Name:** $snap_name  
+        **SBOM File:** $sbom_file  
+        **Generated:** $(date)" \
+          --head "$branch_name" \
+          --base main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Upload result
+      uses: actions/upload-artifact@v4
+      with:
+        name: result-${{ matrix.snap }}
+        path: |
+          result.txt
+        if-no-files-found: ignore
+      if: always()
+    
+    - name: Save result
+      if: always()
+      run: |
+        snap_name="${{ matrix.snap }}"
+        if [ "${{ steps.process-snap.outputs.success }}" == "true" ]; then
+          echo "SUCCESS:$snap_name" > result.txt
+        else
+          echo "FAILED:$snap_name" > result.txt
+        fi
+    
+    - name: Download all results
+      uses: actions/download-artifact@v4
+      with:
+        path: results/
+        pattern: result-*
