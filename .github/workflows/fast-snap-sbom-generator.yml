@@ -1,0 +1,112 @@
+name: Fast Snap SBOM Generator
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    outputs:
+      snaps: ${{ steps.select-snaps.outputs.snaps }}
+      matrix-length: ${{ steps.select-snaps.outputs.matrix-length }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Select snaps to process
+      id: select-snaps
+      run: |
+        # Simply take the first 20 lines from names.txt
+        # (since processed ones will be removed via PR)
+        head -n 20 names.txt > snaps_to_process.txt
+        
+        # Convert to JSON array for matrix
+        snaps_json=$(jq -R -s -c 'split("\n")[:-1]' snaps_to_process.txt)
+        matrix_length=$(echo "$snaps_json" | jq 'length')
+        
+        echo "snaps=$snaps_json" >> $GITHUB_OUTPUT
+        echo "matrix-length=$matrix_length" >> $GITHUB_OUTPUT
+        
+        echo "Snaps to process:"
+        cat snaps_to_process.txt
+        echo "Matrix JSON: $snaps_json"
+        echo "Matrix length: $matrix_length"
+        
+        # Debug info
+        echo "Debug info:"
+        echo "Total snaps in names.txt: $(wc -l < names.txt)"
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24'
+    
+    - name: Build Syft
+      run: |
+        git clone https://github.com/anchore/syft /tmp/syft
+        cd /tmp/syft
+        git checkout add-snap-source
+        make bootstrap
+        make build
+        mkdir -p $GITHUB_WORKSPACE/syft-bin
+        cp syft $GITHUB_WORKSPACE/syft-bin/
+    
+    - name: Upload Syft binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: syft-binary
+        path: syft-bin/
+        retention-days: 1
+
+  scan-snaps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    needs: prepare
+    if: needs.prepare.outputs.matrix-length > 0
+    strategy:
+      matrix:
+        snap: ${{ fromJson(needs.prepare.outputs.snaps) }}
+      fail-fast: false  # Don't cancel other jobs if one fails
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Download Syft binary
+      uses: actions/download-artifact@v4
+      with:
+        name: syft-binary
+        path: ./syft-bin
+    
+    - name: Make Syft executable
+      run: chmod +x ./syft-bin/syft
+    
+    - name: Create sboms directory
+      run: mkdir -p sboms
+    
+    - name: Process snap
+      id: process-snap
+      run: |
+        snap_name="${{ matrix.snap }}"
+        echo "$(date) Processing snap: $snap_name"
+        
+        # Try to generate SBOM using the downloaded Syft binary
+        if ./syft-bin/syft -v --from snap "$snap_name" -o syft-json="sboms/${snap_name}-syft.json"; then
+          echo "$(date) Successfully generated SBOM for $snap_name"
+          echo "success=true" >> $GITHUB_OUTPUT
+          echo "snap_name=$snap_name" >> $GITHUB_OUTPUT
+        else
+          echo "$(date) Failed to generate SBOM for $snap_name"
+          echo "success=false" >> $GITHUB_OUTPUT
+          echo "snap_name=$snap_name" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+
+    # ...rest of the workflow remains the same...
