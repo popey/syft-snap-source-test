@@ -20,20 +20,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
     
-    - name: Restore cache
-      uses: actions/cache/restore@v3
-      with:
-        path: |
-          cache/finished.txt
-          cache/failed.txt
-        key: snap-scan-cache-v1
-        restore-keys: |
-          snap-scan-cache-
-        enableCrossOsArchive: true
-    
-    - name: Create cache directory
-      run: mkdir -p cache
-    
     - name: Select snaps to process
       id: select-snaps
       run: |
@@ -56,12 +42,6 @@ jobs:
         # Debug info
         echo "Debug info:"
         echo "Total snaps in names.txt: $(wc -l < names.txt)"
-        if [ -f cache/finished.txt ]; then
-          echo "Total finished (cache): $(wc -l < cache/finished.txt)"
-        fi
-        if [ -f cache/failed.txt ]; then
-          echo "Total failed (cache): $(wc -l < cache/failed.txt)"
-        fi
 
   scan-snaps:
     runs-on: ubuntu-latest
@@ -168,29 +148,6 @@ jobs:
         else
           echo "FAILED:$snap_name" > result.txt
         fi
-
-  update-cache:
-    runs-on: ubuntu-latest
-    needs: [prepare, scan-snaps]
-    if: always() && needs.prepare.outputs.matrix-length > 0
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Restore cache
-      uses: actions/cache/restore@v3
-      with:
-        path: |
-          cache/finished.txt
-          cache/failed.txt
-        key: snap-scan-cache-v1
-        restore-keys: |
-          snap-scan-cache-
-        enableCrossOsArchive: true
-    
-    - name: Create cache directory
-      run: mkdir -p cache
     
     - name: Download all results
       uses: actions/download-artifact@v4
@@ -198,7 +155,7 @@ jobs:
         path: results/
         pattern: result-*
     
-    - name: Update cache files and collect successful snaps
+    - name: Update collect successful snaps
       run: |
         # Initialize arrays for this run
         successful_snaps=()
@@ -210,32 +167,17 @@ jobs:
             result_content=$(cat "$result_dir/result.txt")
             if [[ $result_content == SUCCESS:* ]]; then
               snap_name=${result_content#SUCCESS:}
-              echo "$snap_name" >> cache/finished.txt
               successful_snaps+=("$snap_name")
-              echo "Added $snap_name to finished.txt"
             elif [[ $result_content == FAILED:* ]]; then
               snap_name=${result_content#FAILED:}
-              echo "$snap_name" >> cache/failed.txt
               failed_snaps+=("$snap_name")
-              echo "Added $snap_name to failed.txt"
             fi
           fi
         done
         
-        # Remove duplicates and sort
-        if [ -f cache/finished.txt ]; then
-          sort -u cache/finished.txt -o cache/finished.txt
-        fi
-        if [ -f cache/failed.txt ]; then
-          sort -u cache/failed.txt -o cache/failed.txt
-        fi
-        
         # Save successful snaps for PR creation
         printf '%s\n' "${successful_snaps[@]}" > successful_snaps_this_run.txt
         
-        echo "Updated cache files:"
-        echo "Finished count: $(wc -l < cache/finished.txt 2>/dev/null || echo 0)"
-        echo "Failed count: $(wc -l < cache/failed.txt 2>/dev/null || echo 0)"
         echo "Successful this run: ${#successful_snaps[@]}"
         echo "Failed this run: ${#failed_snaps[@]}"
     
@@ -311,15 +253,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Save cache
-      uses: actions/cache/save@v3
-      with:
-        path: |
-          cache/finished.txt
-          cache/failed.txt
-        key: snap-scan-cache-v1
-        enableCrossOsArchive: true
-    
     - name: Summary
       run: |
         echo "## Snap SBOM Scanner Summary" >> $GITHUB_STEP_SUMMARY
@@ -354,14 +287,6 @@ jobs:
         # Count totals
         total_finished=0
         total_failed=0
-        
-        if [ -f cache/finished.txt ]; then
-          total_finished=$(wc -l < cache/finished.txt)
-        fi
-        
-        if [ -f cache/failed.txt ]; then
-          total_failed=$(wc -l < cache/failed.txt)
-        fi
         
         echo "📊 **Overall Statistics:**" >> $GITHUB_STEP_SUMMARY
         echo "- Total finished: $total_finished" >> $GITHUB_STEP_SUMMARY
