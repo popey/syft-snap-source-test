@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vulnerability Report</title>
+
+    <!-- Template Metadata-->
+    <meta name="author" content="grype">
+    <meta name="version" content="1.0.0">
+
+    <!-- Source DataTables.js and its dependencies -->
+    <!-- Styling: DataTables | Packages: Jquery | Core: DataTables | Extensions: Buttons, HTML5 Export, JSZip, PDFmake, Responsive -->
+    <link href="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.3.0/b-3.2.3/b-html5-3.2.3/r-3.0.4/datatables.min.css" rel="stylesheet" integrity="sha384-i3FrIG8iE4wl9Hmwo+yL2xgtj0L+/QgCSGfIAJbuoowqsGIdhIpg9ax2eizUyCZw" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" integrity="sha384-VFQrHzqBh5qiJIU0uGU5CIW3+OWpdGGJM9LBnGbuIH2mkICcFZ7lPd/AAtI7SNf7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" integrity="sha384-/RlQG9uf0M2vcTw3CX7fbqgbj/h8wKxw7C3zu9/GxcBPRKOEcESxaxufwRXqzq6n" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.3.0/b-3.2.3/b-html5-3.2.3/r-3.0.4/datatables.min.js" integrity="sha384-uD0xNCd/C2vKjG5NDZ8BdHFubelfW0p6XH+6n7crJnbQcPP6aUw5MJ3WfEZFz3bA" crossorigin="anonymous"></script>
+    
+    <!-- Include Devicon (for specific tech icons) - Using @latest -->
+    <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@2.16.0/devicon.min.css" /> 
+    
+    <!-- Preload SVG icons used in CSS -->
+    <link rel="preload" href="https://api.iconify.design/noto:package.svg" as="image">
+    <link rel="preload" href="https://api.iconify.design/file-icons:alpine-linux.svg" as="image">
+    <link rel="preload" href="https://api.iconify.design/vscode-icons:file-type-excel.svg" as="image">
+    <link rel="preload" href="https://api.iconify.design/vscode-icons:file-type-pdf2.svg" as="image">
+
+    <!-- Font Awesome for search icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- CSS Variables for Theming -->
+    <style>
+        /* Root variables for light theme */
+        :root {
+            --bg-color: #f4f4f4;
+            --text-color: #333;
+            --container-bg: #fff;
+            --container-shadow: rgba(0, 0, 0, 0.1);
+            --header-bg: #e8f0fe;
+            --header-text: #495057;
+            --severity-box-text: rgba(255, 255, 255, 0.9);
+            --severity-box-shadow-hover: rgba(0, 0, 0, 0.2);
+            --input-border-color: #ccc;
+            --input-bg-color: #fff;
+            --input-text-color: #333;
+            --button-bg: #007bff;
+            --button-hover-bg: #0056b3;
+            --button-text: white;
+            --table-border: #ddd;
+            --table-header-bg: #d1dff0;
+            --table-header-text: #333;
+            --table-row-hover-bg: #f5f5f5;
+            --link-color: #007bff;
+            --link-visited-color: #551a8b;
+            --pill-text: white;
+        }
+
+        /* Dark theme variables */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #e0e0e0;
+                --container-bg: #2c2c2c;
+                --container-shadow: rgba(255, 255, 255, 0.1);
+                --header-bg: #3a3a3a;
+                --header-text: #c0c0c0;
+                --severity-box-text: rgba(255, 255, 255, 0.9);
+                --severity-box-shadow-hover: rgba(255, 255, 255, 0.2);
+                --input-border-color: #555;
+                --input-bg-color: #3a3a3a;
+                --input-text-color: #e0e0e0;
+                --button-bg: #0d6efd;
+                --button-hover-bg: #0b5ed7;
+                --button-text: white;
+                --table-border: #444;
+                --table-header-bg: #4a4a4a;
+                --table-header-text: #e0e0e0;
+                --table-row-hover-bg: #3f3f3f;
+                --link-color: #58a6ff;
+                --link-visited-color: #9d8eee;
+                --pill-text: white;
+            }
+
+            /* DataTables dark mode adjustments */
+            .dataTables_wrapper .dataTables_length select,
+            .dataTables_wrapper .dt-search input,
+            .dataTables_wrapper .dataTables_info,
+            .dataTables_wrapper .dataTables_paginate .paginate_button {
+                color: var(--text-color) !important;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                color: #666 !important;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+                 background-color: var(--table-row-hover-bg);
+                 border-color: var(--table-border);
+                 color: var(--text-color) !important;
+            }
+
+            /* Dark mode table link colors */
+            #vulnerabilityTable a {
+                color: var(--link-color);
+            }
+            #vulnerabilityTable a:visited {
+                 color: var(--link-visited-color);
+             }
+        }
+    </style>
+    <!-- Page & Main Container -->
+    <style>
+        /* Base page styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* Main container styling */
+        .main-container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: var(--container-bg);
+            padding: 20px;
+            box-shadow: 0 4px 8px var(--container-shadow);
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        /* Global link styling */
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        a:visited {
+            color: var(--link-visited-color);
+        }
+    </style>
+    <!-- Header Container -->
+    <style>
+        /* Header container styling */
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+        }
+
+        /* Left and right sections of header */
+        .heading-left,
+        .heading-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Right section specific styling */
+        .heading-right {
+            align-items: flex-end;
+            padding-right: 20px;
+            color: var(--header-text);
+        }
+
+        /* Logo image styling */
+        .heading-right img {
+            width: 70px;
+            height: auto;
+        }
+
+        /* Left section text styling */
+        .heading-left h1,
+        .heading-left p {
+            padding-left: 20px;
+            margin: 4px 0;
+        }
+
+        /* Report details grid layout */
+        .heading-left dl.report-details {
+            padding-left: 20px;
+            margin: 4px 0;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2px 10px;
+            align-items: baseline;
+        }
+
+        /* Definition term styling */
+        .heading-left dt {
+            grid-column: 1;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Definition description styling */
+        .heading-left dd {
+            grid-column: 2;
+            margin: 0;
+            text-align: left;
+            word-break: break-all;
+        }
+    </style>
+    <!-- Severity Information Container -->
+    <style>
+        /* Severity info container styling */
+        .severity-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        /* Individual severity box styling */
+        .severity-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Severity title styling */
+        .severity-title {
+            font-size: 0.8em;
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            color: var(--severity-box-text);
+        }
+
+        /* Severity count styling */
+        .severity-count {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        /* Active severity box styling */
+        .severity-box.active {
+            border: 2px solid #007bff;
+        }
+
+        /* Severity color definitions */
+        #critical {
+            background-color: #d9534f;
+        }
+
+        #high {
+            background-color: #f0ad4e;
+        }
+
+        #medium {
+            background-color: #5bc0de;
+        }
+
+        #low {
+            background-color: #5cb85c;
+        }
+
+        #unknown {
+            background-color: #777;
+        }
+
+        /* Severity box hover effects */
+        .severity-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px var(--severity-box-shadow-hover);
+        }
+    </style>
+    <!-- Table Control & Datatables Wrapper -->
+    <style>
+        /* DataTables wrapper styling */
+        .dataTables_wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            margin-bottom: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Button group styling */
+        .dt-buttons {
+            order: 2;
+            flex-grow: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-right: 10px;
+        }
+
+        /* DataTables button styling */
+        .dt-button {
+            background-color: var(--button-bg) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 5px !important;
+            padding: 0 !important;
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center;
+            cursor: pointer;
+            margin-left: 5px !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s ease;
+            overflow: hidden;
+        }
+
+        /* Button hover state */
+        .dt-button:hover {
+            background-color: var(--button-hover-bg) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Icon-only button styling */
+        .dt-button.buttons-pdf,
+        .dt-button.buttons-excel {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Icon-only button hover state */
+        .dt-button.buttons-pdf:hover,
+        .dt-button.buttons-excel:hover {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+            box-shadow: none !important;
+        }
+
+        /* Icon sizing */
+        .dt-button.buttons-pdf .vscode-icons--file-type-pdf2,
+        .dt-button.buttons-excel .vscode-icons--file-type-excel {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Child row details styling */
+        .child-row-details {
+            padding: 10px;
+            margin-left: 25px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            border-top: 1px solid var(--table-border);
+            margin-top: -1px;
+            white-space: normal !important;
+        }
+        .child-row-details b {
+            font-weight: bold;
+        }
+        .child-row-details ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* === Search Bar === */
+
+        /* Search box container */
+        .dataTables_wrapper .dt-search {
+            position: relative;
+        }
+
+        /* Search input styling */
+        .dataTables_wrapper .dt-search .dt-input {
+            height: 36px;
+            width: 36px;
+            border-style: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            outline: none;
+            border-radius: 18px;
+            transition: all 0.5s ease-in-out;
+            background-color: var(--button-bg);
+            padding-left: 10px;
+            padding-right: 30px;
+            color: var(--button-text);
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        /* Search input placeholder styling */
+        .dataTables_wrapper .dt-search .dt-input::placeholder {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        /* Dark mode placeholder adjustments */
+        @media (prefers-color-scheme: dark) {
+            .dataTables_wrapper .dt-search .dt-input::placeholder {
+                color: var(--text-color);
+                opacity: 0.7;
+            }
+            .dataTables_wrapper .dt-search .dt-input:focus {
+                background-color: var(--input-bg-color);
+                color: var(--input-text-color);
+            }
+        }
+
+        /* Search input focus state */
+        .dataTables_wrapper .dt-search .dt-input:focus {
+            width: 250px;
+            border-radius: 5px;
+            background-color: var(--input-bg-color);
+            border: 1px solid var(--input-border-color);
+            color: var(--input-text-color);
+            cursor: text;
+        }
+
+        /* Search icon container */
+        .dataTables_wrapper .dt-search > label {
+            position: absolute;
+            right: 0.1em;
+            top: 0;
+            height: 36px;
+            width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--button-text);
+            font-size: 14px;
+            cursor: pointer;
+            pointer-events: none;
+            z-index: 2;
+            transition: color 0.3s ease-in-out;
+        }
+
+        /* Search icon styling */
+        .dataTables_wrapper .dt-search > label::before {
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                content: "\f002";
+        }
+
+        /* Search icon focus state */
+        .dataTables_wrapper .dt-search .dt-input:focus + label {
+            color: var(--text-color);
+        }
+
+        /* Hide label text */
+        .dataTables_wrapper .dt-search > label span {
+            display: none;
+        }
+    </style>
+    <!-- Table Container -->
+    <style>
+        /* Table container styling */
+        .data-table {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Table base styling */
+        table.display {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--text-color);
+        }
+
+        /* Table cell styling */
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--table-border);
+        }
+
+        /* Table header styling */
+        th {
+            background-color: var(--table-header-bg);
+            font-weight: bold;
+            color: var(--table-header-text);
+        }
+
+        /* Table row hover state */
+        tr:hover {
+            background-color: var(--table-row-hover-bg);
+        }
+
+        /* Table link styling */
+        table.display a {
+             color: var(--link-color);
+        }
+
+        table.display a:visited {
+             color: var(--link-visited-color);
+        }
+
+        /* Fixed-in column styling */
+        .fixed-in ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .fixed-in li {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <!-- Severity Coloring -->
+    <style>
+        /* Severity pill base styling */
+        .severity-pill,
+        .child-row-details .severity-pill {
+            display: inline-block; 
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: var(--pill-text);
+            text-align: center;
+        }
+
+        /* Severity color definitions */
+        .critical,
+        .child-row-details .critical {
+            background-color: #d9534f;
+        }
+
+        .high,
+        .child-row-details .high {
+            background-color: #f0ad4e;
+        }
+
+        .medium,
+        .child-row-details .medium {
+            background-color: #5bc0de;
+        }
+
+        .low,
+        .child-row-details .low {
+            background-color: #5cb85c;
+        }
+
+        .unknown,
+        .child-row-details .unknown {
+            background-color: #777;
+        }
+    </style>
+    <!-- State Coloring -->
+    <style>
+        /* State pill base styling */
+        .state-pill,
+        .child-row-details .state-pill {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: var(--pill-text);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* State color definitions */
+        .fixed,
+        .child-row-details .fixed {
+            background-color: #d9534f;
+        }
+
+        .not-fixed,
+        .child-row-details .not-fixed {
+            background-color: #f0ad4e;
+        }
+
+        .unknown,
+        .child-row-details .unknown {
+            background-color: #6c757d;
+        }
+
+        .wont-fix,
+        .child-row-details .wont-fix {
+            background-color: #5cb85c;
+        }
+    </style>
+
+    <!-- Package Type Icon Styling -->
+    <style>
+        /* Package type cell container */
+        .pkg-type-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Icon base styling */
+        .pkg-type-cell i,
+        .pkg-type-cell .icon-span {
+            font-size: 1.2em;
+            width: 1.2em;
+            text-align: center;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        /* Package icon fallback */
+        .iconify-noto--package {
+            display: inline-block;
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            background-image: url('https://api.iconify.design/noto:package.svg');
+        }
+
+        /* Alpine Linux icon */
+        .iconify-file-icons--alpine-linux {
+            display: inline-block;
+            width: 1.2em;
+            height: 1.2em;
+            background-color: #0d597f;
+            mask-image: url('https://api.iconify.design/file-icons:alpine-linux.svg');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+        }
+
+        /* Excel icon */
+        .vscode-icons--file-type-excel {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            background-image: url('https://api.iconify.design/vscode-icons:file-type-excel.svg');
+        }
+
+        /* PDF icon */
+        .vscode-icons--file-type-pdf2 {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: middle;
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            background-image: url('https://api.iconify.design/vscode-icons:file-type-pdf2.svg');
+        }
+    </style>
+
+</head>
+
+
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+<body>
+    <div class="main-container">
+        <div class="heading">
+            <div class="heading-left">
+                <h1 class="report-title">Vulnerability Report</h1>
+                <dl class="report-details">
+                    <dt>Name:</dt>
+                    <dd id="nameValue">unknown</dd>
+
+                    <dt>Type:</dt>
+                    <dd id="typeValue">sbom-file</dd><dt>Date:</dt>
+                    <dd>
+                        <span id="dateElement">2025-06-04T19:08:57.897206+01:00</span>
+                        <span id="prettyDateElement" style="display: none;"></span>
+                    </dd>
+                </dl>
+            </div>
+            <div class="heading-right">
+                <img src="https://user-images.githubusercontent.com/5199289/136855393-d0a9eef9-ccf1-4e2b-9d7c-7aad16a567e5.png"
+                    alt="Grype Logo">
+            </div>
+        </div>
+        <div class="severity-info">
+            <div class="severity-box" id="critical">
+                <div class="severity-title">Critical</div>
+                <div class="severity-count" id="criticalCount">6</div>
+            </div>
+            <div class="severity-box" id="high">
+                <div class="severity-title">High</div>
+                <div class="severity-count" id="highCount">9</div>
+            </div>
+            <div class="severity-box" id="medium">
+                <div class="severity-title">Medium</div>
+                <div class="severity-count" id="mediumCount">9</div>
+            </div>
+            <div class="severity-box" id="low">
+                <div class="severity-title">Low</div>
+                <div class="severity-count" id="lowCount">0</div>
+            </div>
+            <div class="severity-box" id="unknown">
+                <div class="severity-title">Unknown</div>
+                <div class="severity-count" id="unknownCount">0</div>
+            </div>
+        </div>
+        <div class="data-table">
+            <table id="vulnerabilityTable" class="display nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Type</th>
+                        <th>Vulnerability</th>
+                        <th>Severity</th>
+                        <th>State</th>
+                        <th>Fixed In</th>
+                        <th>Description</th>
+                        <th>Related URLs</th>
+                        <th>PURL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Zlib</td>
+                        <td>1.2.3.2027</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-37434">CVE-2022-37434</a>
+                        </td>
+                        <td>Critical</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>zlib through 1.2.12 has a heap-based buffer over-read or buffer overflow in inflate in inflate.c via a large gzip header extra field. NOTE: only applications that call inflateGetHeader are affected. Some common applications bundle the affected zlib source code but may be unable to call inflateGetHeader (e.g., see the nodejs/node reference).</td>
+                        <td>["http://seclists.org/fulldisclosure/2022/Oct/37","http://seclists.org/fulldisclosure/2022/Oct/38","http://seclists.org/fulldisclosure/2022/Oct/41","http://seclists.org/fulldisclosure/2022/Oct/42","http://www.openwall.com/lists/oss-security/2022/08/05/2","http://www.openwall.com/lists/oss-security/2022/08/09/1","https://github.com/curl/curl/issues/9271","https://github.com/ivd38/zlib_overflow","https://github.com/madler/zlib/blob/21767c654d31d2dccdde4330529775c6c5fd5389/zlib.h#L1062-L1063","https://github.com/madler/zlib/commit/1eb7682f845ac9e9bf9ae35bbfb3bad5dacbd91d","https://github.com/madler/zlib/commit/eff308af425b67093bab25f80f1ae950166bece1","https://github.com/nodejs/node/blob/75b68c6e4db515f76df73af476eccf382bbcb00a/deps/zlib/inflate.c#L762-L764","https://lists.debian.org/debian-lts-announce/2022/09/msg00012.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/JWN4VE3JQR4O2SOUS5TXNLANRPMHWV4I/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/NMBOJ77A7T7PQCARMDUK75TE6LLESZ3O/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/PAVPQNCG3XRLCLNSQRM3KAN5ZFMVXVTY/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/X5U7OTKZSHY2I3ZFJSR2SHFHW72RKGDK/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YRQAI7H4M4RQZ2IWZUEEXECBE5D56BH2/","https://security.netapp.com/advisory/ntap-20220901-0005/","https://security.netapp.com/advisory/ntap-20230427-0007/","https://support.apple.com/kb/HT213488","https://support.apple.com/kb/HT213489","https://support.apple.com/kb/HT213490","https://support.apple.com/kb/HT213491","https://support.apple.com/kb/HT213493","https://support.apple.com/kb/HT213494","https://www.debian.org/security/2022/dsa-5218","http://seclists.org/fulldisclosure/2022/Oct/37","http://seclists.org/fulldisclosure/2022/Oct/38","http://seclists.org/fulldisclosure/2022/Oct/41","http://seclists.org/fulldisclosure/2022/Oct/42","http://www.openwall.com/lists/oss-security/2022/08/05/2","http://www.openwall.com/lists/oss-security/2022/08/09/1","https://github.com/curl/curl/issues/9271","https://github.com/ivd38/zlib_overflow","https://github.com/madler/zlib/blob/21767c654d31d2dccdde4330529775c6c5fd5389/zlib.h#L1062-L1063","https://github.com/madler/zlib/commit/eff308af425b67093bab25f80f1ae950166bece1","https://github.com/nodejs/node/blob/75b68c6e4db515f76df73af476eccf382bbcb00a/deps/zlib/inflate.c#L762-L764","https://lists.debian.org/debian-lts-announce/2022/09/msg00012.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/JWN4VE3JQR4O2SOUS5TXNLANRPMHWV4I/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/NMBOJ77A7T7PQCARMDUK75TE6LLESZ3O/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/PAVPQNCG3XRLCLNSQRM3KAN5ZFMVXVTY/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/X5U7OTKZSHY2I3ZFJSR2SHFHW72RKGDK/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/YRQAI7H4M4RQZ2IWZUEEXECBE5D56BH2/","https://security.netapp.com/advisory/ntap-20220901-0005/","https://security.netapp.com/advisory/ntap-20230427-0007/","https://support.apple.com/kb/HT213488","https://support.apple.com/kb/HT213489","https://support.apple.com/kb/HT213490","https://support.apple.com/kb/HT213491","https://support.apple.com/kb/HT213493","https://support.apple.com/kb/HT213494","https://www.debian.org/security/2022/dsa-5218","https://github.com/curl/curl/issues/9271"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Zlib</td>
+                        <td>1.2.3.2027</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-9841">CVE-2016-9841</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.2.9</li>
+                            </ul>
+                        </td>
+                        <td>inffast.c in zlib 1.2.8 might allow context-dependent attackers to have unspecified impact by leveraging improper pointer arithmetic.</td>
+                        <td>["http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpujul2018-4258247.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","http://www.securitytracker.com/id/1039596","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402346","https://github.com/madler/zlib/commit/9aaec95e82117c1cb0f9624264c3618fc380cecb","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://security.netapp.com/advisory/ntap-20171019-0001/","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html","http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpujul2018-4258247.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","http://www.securitytracker.com/id/1039596","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402346","https://github.com/madler/zlib/commit/9aaec95e82117c1cb0f9624264c3618fc380cecb","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://security.netapp.com/advisory/ntap-20171019-0001/","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2010-1205">CVE-2010-1205</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.2.44</li>
+                                <li>1.4.3</li>
+                            </ul>
+                        </td>
+                        <td>Buffer overflow in pngpread.c in libpng before 1.2.44 and 1.4.x before 1.4.3, as used in progressive applications, might allow remote attackers to execute arbitrary code via a PNG image that triggers an additional data row.</td>
+                        <td>["http://blackberry.com/btsc/KB27244","http://code.google.com/p/chromium/issues/detail?id=45983","http://googlechromereleases.blogspot.com/2010/07/stable-channel-update.html","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commitdiff%3Bh=188eb6b42602bf7d7ae708a21897923b6a83fe7c#patch18","http://lists.apple.com/archives/security-announce/2010//Aug/msg00003.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00000.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00003.html","http://lists.apple.com/archives/security-announce/2011//Mar/msg00004.html","http://lists.apple.com/archives/security-announce/2011/Mar/msg00000.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044283.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044397.html","http://lists.opensuse.org/opensuse-security-announce/2010-09/msg00006.html","http://lists.vmware.com/pipermail/security-announce/2010/000105.html","http://secunia.com/advisories/40302","http://secunia.com/advisories/40336","http://secunia.com/advisories/40472","http://secunia.com/advisories/40547","http://secunia.com/advisories/41574","http://secunia.com/advisories/42314","http://secunia.com/advisories/42317","http://slackware.com/security/viewer.php?l=slackware-security\u0026y=2010\u0026m=slackware-security.613061","http://support.apple.com/kb/HT4312","http://support.apple.com/kb/HT4435","http://support.apple.com/kb/HT4456","http://support.apple.com/kb/HT4457","http://support.apple.com/kb/HT4554","http://support.apple.com/kb/HT4566","http://trac.webkit.org/changeset/61816","http://www.debian.org/security/2010/dsa-2072","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2010:133","http://www.mozilla.org/security/announce/2010/mfsa2010-41.html","http://www.securityfocus.com/bid/41174","http://www.ubuntu.com/usn/USN-960-1","http://www.vmware.com/security/advisories/VMSA-2010-0014.html","http://www.vupen.com/english/advisories/2010/1612","http://www.vupen.com/english/advisories/2010/1637","http://www.vupen.com/english/advisories/2010/1755","http://www.vupen.com/english/advisories/2010/1837","http://www.vupen.com/english/advisories/2010/1846","http://www.vupen.com/english/advisories/2010/1877","http://www.vupen.com/english/advisories/2010/2491","http://www.vupen.com/english/advisories/2010/3045","http://www.vupen.com/english/advisories/2010/3046","https://bugs.webkit.org/show_bug.cgi?id=40798","https://bugzilla.mozilla.org/show_bug.cgi?id=570451","https://bugzilla.redhat.com/show_bug.cgi?id=608238","https://exchange.xforce.ibmcloud.com/vulnerabilities/59815","https://oval.cisecurity.org/repository/search/definition/oval%3Aorg.mitre.oval%3Adef%3A11851","http://blackberry.com/btsc/KB27244","http://code.google.com/p/chromium/issues/detail?id=45983","http://googlechromereleases.blogspot.com/2010/07/stable-channel-update.html","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commitdiff%3Bh=188eb6b42602bf7d7ae708a21897923b6a83fe7c#patch18","http://lists.apple.com/archives/security-announce/2010//Aug/msg00003.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00000.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00003.html","http://lists.apple.com/archives/security-announce/2011//Mar/msg00004.html","http://lists.apple.com/archives/security-announce/2011/Mar/msg00000.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044283.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044397.html","http://lists.opensuse.org/opensuse-security-announce/2010-09/msg00006.html","http://lists.vmware.com/pipermail/security-announce/2010/000105.html","http://secunia.com/advisories/40302","http://secunia.com/advisories/40336","http://secunia.com/advisories/40472","http://secunia.com/advisories/40547","http://secunia.com/advisories/41574","http://secunia.com/advisories/42314","http://secunia.com/advisories/42317","http://slackware.com/security/viewer.php?l=slackware-security\u0026y=2010\u0026m=slackware-security.613061","http://support.apple.com/kb/HT4312","http://support.apple.com/kb/HT4435","http://support.apple.com/kb/HT4456","http://support.apple.com/kb/HT4457","http://support.apple.com/kb/HT4554","http://support.apple.com/kb/HT4566","http://trac.webkit.org/changeset/61816","http://www.debian.org/security/2010/dsa-2072","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2010:133","http://www.mozilla.org/security/announce/2010/mfsa2010-41.html","http://www.securityfocus.com/bid/41174","http://www.ubuntu.com/usn/USN-960-1","http://www.vmware.com/security/advisories/VMSA-2010-0014.html","http://www.vupen.com/english/advisories/2010/1612","http://www.vupen.com/english/advisories/2010/1637","http://www.vupen.com/english/advisories/2010/1755","http://www.vupen.com/english/advisories/2010/1837","http://www.vupen.com/english/advisories/2010/1846","http://www.vupen.com/english/advisories/2010/1877","http://www.vupen.com/english/advisories/2010/2491","http://www.vupen.com/english/advisories/2010/3045","http://www.vupen.com/english/advisories/2010/3046","https://bugs.webkit.org/show_bug.cgi?id=40798","https://bugzilla.mozilla.org/show_bug.cgi?id=570451","https://bugzilla.redhat.com/show_bug.cgi?id=608238","https://exchange.xforce.ibmcloud.com/vulnerabilities/59815","https://oval.cisecurity.org/repository/search/definition/oval%3Aorg.mitre.oval%3Adef%3A11851"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Zlib</td>
+                        <td>1.2.3.2027</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-9843">CVE-2016-9843</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.2.9</li>
+                            </ul>
+                        </td>
+                        <td>The crc32_big function in crc32.c in zlib 1.2.8 might allow context-dependent attackers to have unspecified impact via vectors involving big-endian CRC calculation.</td>
+                        <td>["http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpujul2018-4258247.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","http://www.securitytracker.com/id/1041888","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402351","https://github.com/madler/zlib/commit/d1d577490c15a0c6862473d7576352a9f18ef811","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://security.netapp.com/advisory/ntap-20181018-0002/","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html","http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpujul2018-4258247.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","http://www.securitytracker.com/id/1041888","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402351","https://github.com/madler/zlib/commit/d1d577490c15a0c6862473d7576352a9f18ef811","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://security.netapp.com/advisory/ntap-20181018-0002/","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Zlib</td>
+                        <td>1.2.3.2027</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-9842">CVE-2016-9842</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.2.9</li>
+                            </ul>
+                        </td>
+                        <td>The inflateMark function in inflate.c in zlib 1.2.8 might allow context-dependent attackers to have unspecified impact via vectors involving left shifts of negative integers.</td>
+                        <td>["http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402348","https://github.com/madler/zlib/commit/e54e1299404101a5a9d0cf5e45512b543967f958","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html","http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402348","https://github.com/madler/zlib/commit/e54e1299404101a5a9d0cf5e45512b543967f958","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Zlib</td>
+                        <td>1.2.3.2027</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-9840">CVE-2016-9840</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.2.9</li>
+                            </ul>
+                        </td>
+                        <td>inftrees.c in zlib 1.2.8 might allow context-dependent attackers to have unspecified impact by leveraging improper pointer arithmetic.</td>
+                        <td>["http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402345","https://github.com/madler/zlib/commit/6a043145ca6e9c55184013841a67b2fef87e44c0","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html","http://lists.opensuse.org/opensuse-updates/2016-12/msg00127.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00050.html","http://lists.opensuse.org/opensuse-updates/2017-01/msg00053.html","http://www.openwall.com/lists/oss-security/2016/12/05/21","http://www.oracle.com/technetwork/security-advisory/cpuoct2017-3236626.html","http://www.oracle.com/technetwork/security-advisory/cpuoct2018-4428296.html","http://www.securityfocus.com/bid/95131","http://www.securitytracker.com/id/1039427","https://access.redhat.com/errata/RHSA-2017:1220","https://access.redhat.com/errata/RHSA-2017:1221","https://access.redhat.com/errata/RHSA-2017:1222","https://access.redhat.com/errata/RHSA-2017:2999","https://access.redhat.com/errata/RHSA-2017:3046","https://access.redhat.com/errata/RHSA-2017:3047","https://access.redhat.com/errata/RHSA-2017:3453","https://bugzilla.redhat.com/show_bug.cgi?id=1402345","https://github.com/madler/zlib/commit/6a043145ca6e9c55184013841a67b2fef87e44c0","https://lists.debian.org/debian-lts-announce/2019/03/msg00027.html","https://lists.debian.org/debian-lts-announce/2020/01/msg00030.html","https://security.gentoo.org/glsa/201701-56","https://security.gentoo.org/glsa/202007-54","https://support.apple.com/HT208112","https://support.apple.com/HT208113","https://support.apple.com/HT208115","https://support.apple.com/HT208144","https://usn.ubuntu.com/4246-1/","https://usn.ubuntu.com/4292-1/","https://wiki.mozilla.org/MOSS/Secure_Open_Source/Completed#zlib","https://wiki.mozilla.org/images/0/09/Zlib-report.pdf","https://www.oracle.com/security-alerts/cpujul2020.html"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2011-3045">CVE-2011-3045</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.5.10</li>
+                            </ul>
+                        </td>
+                        <td>Integer signedness error in the png_inflate function in pngrutil.c in libpng before 1.4.10beta01, as used in Google Chrome before 17.0.963.83 and other products, allows remote attackers to cause a denial of service (application crash) or possibly execute arbitrary code via a crafted PNG file, a different vulnerability than CVE-2011-3026.</td>
+                        <td>["http://code.google.com/p/chromium/issues/detail?id=116162","http://googlechromereleases.blogspot.com/2012/03/stable-channel-update_21.html","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=a8c319a2b281af68f7ca0e2f9a28ca57b44ceb2b","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075424.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075619.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075981.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075987.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/076461.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/076731.html","http://lists.opensuse.org/opensuse-security-announce/2012-04/msg00000.html","http://lists.opensuse.org/opensuse-updates/2012-03/msg00051.html","http://rhn.redhat.com/errata/RHSA-2012-0407.html","http://rhn.redhat.com/errata/RHSA-2012-0488.html","http://secunia.com/advisories/48320","http://secunia.com/advisories/48485","http://secunia.com/advisories/48512","http://secunia.com/advisories/48554","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://src.chromium.org/viewvc/chrome?view=rev\u0026revision=125311","http://www.debian.org/security/2012/dsa-2439","http://www.mandriva.com/security/advisories?name=MDVSA-2012:033","http://www.securitytracker.com/id?1026823","https://bugzilla.redhat.com/show_bug.cgi?id=799000","https://oval.cisecurity.org/repository/search/definition/oval%3Aorg.mitre.oval%3Adef%3A14763","http://code.google.com/p/chromium/issues/detail?id=116162","http://googlechromereleases.blogspot.com/2012/03/stable-channel-update_21.html","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=a8c319a2b281af68f7ca0e2f9a28ca57b44ceb2b","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075424.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075619.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075981.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/075987.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/076461.html","http://lists.fedoraproject.org/pipermail/package-announce/2012-March/076731.html","http://lists.opensuse.org/opensuse-security-announce/2012-04/msg00000.html","http://lists.opensuse.org/opensuse-updates/2012-03/msg00051.html","http://rhn.redhat.com/errata/RHSA-2012-0407.html","http://rhn.redhat.com/errata/RHSA-2012-0488.html","http://secunia.com/advisories/48320","http://secunia.com/advisories/48485","http://secunia.com/advisories/48512","http://secunia.com/advisories/48554","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://src.chromium.org/viewvc/chrome?view=rev\u0026revision=125311","http://www.debian.org/security/2012/dsa-2439","http://www.mandriva.com/security/advisories?name=MDVSA-2012:033","http://www.securitytracker.com/id?1026823","https://bugzilla.redhat.com/show_bug.cgi?id=799000","https://oval.cisecurity.org/repository/search/definition/oval%3Aorg.mitre.oval%3Adef%3A14763"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2015-8126">CVE-2015-8126</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.0.64</li>
+                                <li>1.2.54</li>
+                                <li>1.4.17</li>
+                                <li>1.5.24</li>
+                                <li>1.6.19</li>
+                            </ul>
+                        </td>
+                        <td>Multiple buffer overflows in the (1) png_set_PLTE and (2) png_get_PLTE functions in libpng before 1.0.64, 1.1.x and 1.2.x before 1.2.54, 1.3.x and 1.4.x before 1.4.17, 1.5.x before 1.5.24, and 1.6.x before 1.6.19 allow remote attackers to cause a denial of service (application crash) or possibly have unspecified other impact via a small bit-depth value in an IHDR (aka image header) chunk in a PNG image.</td>
+                        <td>["http://googlechromereleases.blogspot.com/2016/03/stable-channel-update.html","http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172324.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172620.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172647.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172663.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172769.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172797.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172823.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-February/177344.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-February/177382.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174905.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174936.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-January/175073.html","http://lists.opensuse.org/opensuse-security-announce/2015-11/msg00033.html","http://lists.opensuse.org/opensuse-security-announce/2015-11/msg00034.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00038.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00041.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00042.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00043.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00044.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00045.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00047.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00048.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00014.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00015.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00018.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00028.html","http://lists.opensuse.org/opensuse-updates/2015-11/msg00159.html","http://lists.opensuse.org/opensuse-updates/2015-11/msg00160.html","http://lists.opensuse.org/opensuse-updates/2015-12/msg00062.html","http://lists.opensuse.org/opensuse-updates/2015-12/msg00063.html","http://lists.opensuse.org/opensuse-updates/2016-01/msg00028.html","http://lists.opensuse.org/opensuse-updates/2016-01/msg00029.html","http://lists.opensuse.org/opensuse-updates/2016-01/msg00030.html","http://rhn.redhat.com/errata/RHSA-2015-2594.html","http://rhn.redhat.com/errata/RHSA-2015-2595.html","http://rhn.redhat.com/errata/RHSA-2015-2596.html","http://rhn.redhat.com/errata/RHSA-2016-0055.html","http://rhn.redhat.com/errata/RHSA-2016-0056.html","http://rhn.redhat.com/errata/RHSA-2016-0057.html","http://www.debian.org/security/2015/dsa-3399","http://www.debian.org/security/2016/dsa-3507","http://www.openwall.com/lists/oss-security/2015/11/12/2","http://www.oracle.com/technetwork/topics/security/bulletinjul2016-3090568.html","http://www.oracle.com/technetwork/topics/security/cpujan2016-2367955.html","http://www.oracle.com/technetwork/topics/security/linuxbulletinoct2015-2719645.html","http://www.securityfocus.com/bid/77568","http://www.securitytracker.com/id/1034142","http://www.ubuntu.com/usn/USN-2815-1","https://access.redhat.com/errata/RHSA-2016:1430","https://code.google.com/p/chromium/issues/detail?id=560291","https://kc.mcafee.com/corporate/index?page=content\u0026id=SB10148","https://security.gentoo.org/glsa/201603-09","https://security.gentoo.org/glsa/201611-08","https://support.apple.com/HT206167","http://googlechromereleases.blogspot.com/2016/03/stable-channel-update.html","http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172324.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172620.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172647.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172663.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172769.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172797.html","http://lists.fedoraproject.org/pipermail/package-announce/2015-November/172823.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-February/177344.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-February/177382.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174905.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-January/174936.html","http://lists.fedoraproject.org/pipermail/package-announce/2016-January/175073.html","http://lists.opensuse.org/opensuse-security-announce/2015-11/msg00033.html","http://lists.opensuse.org/opensuse-security-announce/2015-11/msg00034.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00038.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00041.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00042.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00043.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00044.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00045.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00047.html","http://lists.opensuse.org/opensuse-security-announce/2016-01/msg00048.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00014.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00015.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00018.html","http://lists.opensuse.org/opensuse-security-announce/2016-03/msg00028.html","http://lists.opensuse.org/opensuse-updates/2015-11/msg00159.html","http://lists.opensuse.org/opensuse-updates/2015-11/msg00160.html","http://lists.opensuse.org/opensuse-updates/2015-12/msg00062.html","http://lists.opensuse.org/opensuse-updates/2015-12/msg00063.html","http://lists.opensuse.org/opensuse-updates/2016-01/msg00028.html","http://lists.opensuse.org/opensuse-updates/2016-01/msg00029.html","http://lists.opensuse.org/opensuse-updates/2016-01/msg00030.html","http://rhn.redhat.com/errata/RHSA-2015-2594.html","http://rhn.redhat.com/errata/RHSA-2015-2595.html","http://rhn.redhat.com/errata/RHSA-2015-2596.html","http://rhn.redhat.com/errata/RHSA-2016-0055.html","http://rhn.redhat.com/errata/RHSA-2016-0056.html","http://rhn.redhat.com/errata/RHSA-2016-0057.html","http://www.debian.org/security/2015/dsa-3399","http://www.debian.org/security/2016/dsa-3507","http://www.openwall.com/lists/oss-security/2015/11/12/2","http://www.oracle.com/technetwork/topics/security/bulletinjul2016-3090568.html","http://www.oracle.com/technetwork/topics/security/cpujan2016-2367955.html","http://www.oracle.com/technetwork/topics/security/linuxbulletinoct2015-2719645.html","http://www.securityfocus.com/bid/77568","http://www.securitytracker.com/id/1034142","http://www.ubuntu.com/usn/USN-2815-1","https://access.redhat.com/errata/RHSA-2016:1430","https://code.google.com/p/chromium/issues/detail?id=560291","https://kc.mcafee.com/corporate/index?page=content\u0026id=SB10148","https://security.gentoo.org/glsa/201603-09","https://security.gentoo.org/glsa/201611-08","https://support.apple.com/HT206167"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2014-9495">CVE-2014-9495</a>
+                        </td>
+                        <td>High</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>Heap-based buffer overflow in the png_combine_row function in libpng before 1.5.21 and 1.6.x before 1.6.16, when running on 64-bit systems, might allow context-dependent attackers to execute arbitrary code via a &#34;very wide interlaced&#34; PNG image.</td>
+                        <td>["http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html","http://secunia.com/advisories/62725","http://sourceforge.net/p/png-mng/mailman/message/33172831/","http://sourceforge.net/p/png-mng/mailman/message/33173461/","http://www.openwall.com/lists/oss-security/2015/01/04/3","http://www.openwall.com/lists/oss-security/2015/01/10/1","http://www.openwall.com/lists/oss-security/2015/01/10/3","http://www.oracle.com/technetwork/topics/security/bulletinjul2015-2511963.html","http://www.securityfocus.com/bid/71820","http://www.securitytracker.com/id/1031444","https://support.apple.com/HT206167","http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html","http://secunia.com/advisories/62725","http://sourceforge.net/p/png-mng/mailman/message/33172831/","http://sourceforge.net/p/png-mng/mailman/message/33173461/","http://www.openwall.com/lists/oss-security/2015/01/04/3","http://www.openwall.com/lists/oss-security/2015/01/10/1","http://www.openwall.com/lists/oss-security/2015/01/10/3","http://www.oracle.com/technetwork/topics/security/bulletinjul2015-2511963.html","http://www.securityfocus.com/bid/71820","http://www.securitytracker.com/id/1031444","https://support.apple.com/HT206167"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2010-0205">CVE-2010-0205</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.0.53</li>
+                                <li>1.2.43</li>
+                                <li>1.4.1</li>
+                            </ul>
+                        </td>
+                        <td>The png_decompress_chunk function in pngrutil.c in libpng 1.0.x before 1.0.53, 1.2.x before 1.2.43, and 1.4.x before 1.4.1 does not properly handle compressed ancillary-chunk data that has a disproportionately large uncompressed representation, which allows remote attackers to cause a denial of service (memory and CPU consumption, and application hang) via a crafted PNG file, as demonstrated by use of the deflate compression method on data composed of many occurrences of the same character, related to a &#34;decompression bomb&#34; attack.</td>
+                        <td>["http://libpng.sourceforge.net/ADVISORY-1.4.1.html","http://libpng.sourceforge.net/decompression_bombs.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00000.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037237.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037355.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037364.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037607.html","http://lists.opensuse.org/opensuse-security-announce/2010-05/msg00001.html","http://lists.opensuse.org/opensuse-security-announce/2010-05/msg00002.html","http://lists.opensuse.org/opensuse-security-announce/2010-06/msg00001.html","http://lists.vmware.com/pipermail/security-announce/2010/000105.html","http://osvdb.org/62670","http://secunia.com/advisories/38774","http://secunia.com/advisories/39251","http://secunia.com/advisories/41574","http://support.apple.com/kb/HT4435","http://ubuntu.com/usn/usn-913-1","http://www.debian.org/security/2010/dsa-2032","http://www.kb.cert.org/vuls/id/576029","http://www.mandriva.com/security/advisories?name=MDVSA-2010:063","http://www.mandriva.com/security/advisories?name=MDVSA-2010:064","http://www.securityfocus.com/bid/38478","http://www.securitytracker.com/id?1023674","http://www.vmware.com/security/advisories/VMSA-2010-0014.html","http://www.vupen.com/english/advisories/2010/0517","http://www.vupen.com/english/advisories/2010/0605","http://www.vupen.com/english/advisories/2010/0626","http://www.vupen.com/english/advisories/2010/0637","http://www.vupen.com/english/advisories/2010/0667","http://www.vupen.com/english/advisories/2010/0682","http://www.vupen.com/english/advisories/2010/0686","http://www.vupen.com/english/advisories/2010/0847","http://www.vupen.com/english/advisories/2010/1107","http://www.vupen.com/english/advisories/2010/2491","https://exchange.xforce.ibmcloud.com/vulnerabilities/56661","http://libpng.sourceforge.net/ADVISORY-1.4.1.html","http://libpng.sourceforge.net/decompression_bombs.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00000.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037237.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037355.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037364.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-March/037607.html","http://lists.opensuse.org/opensuse-security-announce/2010-05/msg00001.html","http://lists.opensuse.org/opensuse-security-announce/2010-05/msg00002.html","http://lists.opensuse.org/opensuse-security-announce/2010-06/msg00001.html","http://lists.vmware.com/pipermail/security-announce/2010/000105.html","http://osvdb.org/62670","http://secunia.com/advisories/38774","http://secunia.com/advisories/39251","http://secunia.com/advisories/41574","http://support.apple.com/kb/HT4435","http://ubuntu.com/usn/usn-913-1","http://www.debian.org/security/2010/dsa-2032","http://www.kb.cert.org/vuls/id/576029","http://www.mandriva.com/security/advisories?name=MDVSA-2010:063","http://www.mandriva.com/security/advisories?name=MDVSA-2010:064","http://www.securityfocus.com/bid/38478","http://www.securitytracker.com/id?1023674","http://www.vmware.com/security/advisories/VMSA-2010-0014.html","http://www.vupen.com/english/advisories/2010/0517","http://www.vupen.com/english/advisories/2010/0605","http://www.vupen.com/english/advisories/2010/0626","http://www.vupen.com/english/advisories/2010/0637","http://www.vupen.com/english/advisories/2010/0667","http://www.vupen.com/english/advisories/2010/0682","http://www.vupen.com/english/advisories/2010/0686","http://www.vupen.com/english/advisories/2010/0847","http://www.vupen.com/english/advisories/2010/1107","http://www.vupen.com/english/advisories/2010/2491","https://exchange.xforce.ibmcloud.com/vulnerabilities/56661"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2013-6954">CVE-2013-6954</a>
+                        </td>
+                        <td>Medium</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>The png_do_expand_palette function in libpng before 1.6.8 allows remote attackers to cause a denial of service (NULL pointer dereference and application crash) via (1) a PLTE chunk of zero bytes or (2) a NULL palette, related to pngrtran.c and pngset.c.</td>
+                        <td>["http://advisories.mageia.org/MGASA-2014-0075.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/127947.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/127952.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128098.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128099.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128114.html","http://lists.opensuse.org/opensuse-updates/2014-01/msg00071.html","http://marc.info/?l=bugtraq\u0026m=140852886808946\u0026w=2","http://marc.info/?l=bugtraq\u0026m=140852886808946\u0026w=2","http://marc.info/?l=bugtraq\u0026m=140852974709252\u0026w=2","http://marc.info/?l=bugtraq\u0026m=140852974709252\u0026w=2","http://secunia.com/advisories/58974","http://secunia.com/advisories/59058","http://security.gentoo.org/glsa/glsa-201406-32.xml","http://sourceforge.net/p/libpng/code/ci/1faa6ff32c648acfe3cf30a58d31d7aebc24968c","http://sourceforge.net/projects/libpng/files/libpng16/1.6.8/","http://www-01.ibm.com/support/docview.wss?uid=swg21672080","http://www-01.ibm.com/support/docview.wss?uid=swg21676746","http://www.kb.cert.org/vuls/id/650142","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2014:035","http://www.oracle.com/technetwork/topics/security/cpuapr2014-1972952.html","http://www.securityfocus.com/bid/64493","https://access.redhat.com/errata/RHSA-2014:0413","https://access.redhat.com/errata/RHSA-2014:0414","https://bugzilla.redhat.com/show_bug.cgi?id=1045561","https://www.ibm.com/support/docview.wss?uid=swg21675973","http://advisories.mageia.org/MGASA-2014-0075.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/127947.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/127952.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128098.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128099.html","http://lists.fedoraproject.org/pipermail/package-announce/2014-February/128114.html","http://lists.opensuse.org/opensuse-updates/2014-01/msg00071.html","http://marc.info/?l=bugtraq\u0026m=140852886808946\u0026w=2","http://marc.info/?l=bugtraq\u0026m=140852886808946\u0026w=2","http://marc.info/?l=bugtraq\u0026m=140852974709252\u0026w=2","http://marc.info/?l=bugtraq\u0026m=140852974709252\u0026w=2","http://secunia.com/advisories/58974","http://secunia.com/advisories/59058","http://security.gentoo.org/glsa/glsa-201406-32.xml","http://sourceforge.net/p/libpng/code/ci/1faa6ff32c648acfe3cf30a58d31d7aebc24968c","http://sourceforge.net/projects/libpng/files/libpng16/1.6.8/","http://www-01.ibm.com/support/docview.wss?uid=swg21672080","http://www-01.ibm.com/support/docview.wss?uid=swg21676746","http://www.kb.cert.org/vuls/id/650142","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2014:035","http://www.oracle.com/technetwork/topics/security/cpuapr2014-1972952.html","http://www.securityfocus.com/bid/64493","https://access.redhat.com/errata/RHSA-2014:0413","https://access.redhat.com/errata/RHSA-2014:0414","https://bugzilla.redhat.com/show_bug.cgi?id=1045561","https://www.ibm.com/support/docview.wss?uid=swg21675973"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2692">CVE-2011-2692</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.0.55</li>
+                                <li>1.2.45</li>
+                                <li>1.4.8</li>
+                                <li>1.5.4</li>
+                            </ul>
+                        </td>
+                        <td>The png_handle_sCAL function in pngrutil.c in libpng 1.0.x before 1.0.55, 1.2.x before 1.2.45, 1.4.x before 1.4.8, and 1.5.x before 1.5.4 does not properly handle invalid sCAL chunks, which allows remote attackers to cause a denial of service (memory corruption and application crash) or possibly have unspecified other impact via a crafted PNG image that triggers the reading of uninitialized memory.</td>
+                        <td>["http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=61a2d8a2a7b03023e63eae9a3e64607aaaa6d339","http://lists.apple.com/archives/Security-announce/2011//Oct/msg00003.html","http://lists.apple.com/archives/security-announce/2012/May/msg00001.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://secunia.com/advisories/45046","http://secunia.com/advisories/45405","http://secunia.com/advisories/45415","http://secunia.com/advisories/45445","http://secunia.com/advisories/45460","http://secunia.com/advisories/45461","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://sourceforge.net/mailarchive/forum.php?thread_name=003101cc2790%24fb5d6e80%24f2184b80%24%40acm.org\u0026forum_name=png-mng-implement","http://support.apple.com/kb/HT5002","http://support.apple.com/kb/HT5281","http://www.debian.org/security/2011/dsa-2287","http://www.kb.cert.org/vuls/id/819894","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/07/13/2","http://www.redhat.com/support/errata/RHSA-2011-1103.html","http://www.redhat.com/support/errata/RHSA-2011-1104.html","http://www.redhat.com/support/errata/RHSA-2011-1105.html","http://www.securityfocus.com/bid/48618","http://www.ubuntu.com/usn/USN-1175-1","https://bugzilla.redhat.com/show_bug.cgi?id=720612","https://exchange.xforce.ibmcloud.com/vulnerabilities/68536","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=61a2d8a2a7b03023e63eae9a3e64607aaaa6d339","http://lists.apple.com/archives/Security-announce/2011//Oct/msg00003.html","http://lists.apple.com/archives/security-announce/2012/May/msg00001.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://secunia.com/advisories/45046","http://secunia.com/advisories/45405","http://secunia.com/advisories/45415","http://secunia.com/advisories/45445","http://secunia.com/advisories/45460","http://secunia.com/advisories/45461","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://sourceforge.net/mailarchive/forum.php?thread_name=003101cc2790%24fb5d6e80%24f2184b80%24%40acm.org\u0026forum_name=png-mng-implement","http://support.apple.com/kb/HT5002","http://support.apple.com/kb/HT5281","http://www.debian.org/security/2011/dsa-2287","http://www.kb.cert.org/vuls/id/819894","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/07/13/2","http://www.redhat.com/support/errata/RHSA-2011-1103.html","http://www.redhat.com/support/errata/RHSA-2011-1104.html","http://www.redhat.com/support/errata/RHSA-2011-1105.html","http://www.securityfocus.com/bid/48618","http://www.ubuntu.com/usn/USN-1175-1","https://bugzilla.redhat.com/show_bug.cgi?id=720612","https://exchange.xforce.ibmcloud.com/vulnerabilities/68536"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2691">CVE-2011-2691</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.0.55</li>
+                                <li>1.2.45</li>
+                                <li>1.4.8</li>
+                                <li>1.5.4</li>
+                            </ul>
+                        </td>
+                        <td>The png_err function in pngerror.c in libpng 1.0.x before 1.0.55, 1.2.x before 1.2.45, 1.4.x before 1.4.8, and 1.5.x before 1.5.4 makes a function call using a NULL pointer argument instead of an empty-string argument, which allows remote attackers to cause a denial of service (application crash) via a crafted PNG image.</td>
+                        <td>["http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=9dad5e37aef295b4ef8dea39392b652deebc9261","http://lists.apple.com/archives/Security-announce/2011//Oct/msg00003.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://marc.info/?l=bugtraq\u0026m=133951357207000\u0026w=2","http://marc.info/?l=bugtraq\u0026m=133951357207000\u0026w=2","http://secunia.com/advisories/45046","http://secunia.com/advisories/45405","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://support.apple.com/kb/HT5002","http://www.debian.org/security/2011/dsa-2287","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/07/13/2","http://www.securityfocus.com/bid/48660","https://bugzilla.redhat.com/show_bug.cgi?id=720608","https://exchange.xforce.ibmcloud.com/vulnerabilities/68537","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=9dad5e37aef295b4ef8dea39392b652deebc9261","http://lists.apple.com/archives/Security-announce/2011//Oct/msg00003.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://marc.info/?l=bugtraq\u0026m=133951357207000\u0026w=2","http://marc.info/?l=bugtraq\u0026m=133951357207000\u0026w=2","http://secunia.com/advisories/45046","http://secunia.com/advisories/45405","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://support.apple.com/kb/HT5002","http://www.debian.org/security/2011/dsa-2287","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/07/13/2","http://www.securityfocus.com/bid/48660","https://bugzilla.redhat.com/show_bug.cgi?id=720608","https://exchange.xforce.ibmcloud.com/vulnerabilities/68537"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2015-0973">CVE-2015-0973</a>
+                        </td>
+                        <td>High</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>Buffer overflow in the png_read_IDAT_data function in pngrutil.c in libpng before 1.5.21 and 1.6.x before 1.6.16 allows context-dependent attackers to execute arbitrary code via IDAT data with a large width, a different vulnerability than CVE-2014-9495.</td>
+                        <td>["http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html","http://secunia.com/advisories/62725","http://sourceforge.net/p/png-mng/mailman/message/33173461/","http://tfpwn.com/files/libpng_heap_overflow_1.6.15.txt","http://www.openwall.com/lists/oss-security/2015/01/10/1","http://www.openwall.com/lists/oss-security/2015/01/10/3","http://www.oracle.com/technetwork/topics/security/bulletinjul2015-2511963.html","https://security.netapp.com/advisory/ntap-20240719-0005/","https://support.apple.com/HT206167","http://lists.apple.com/archives/security-announce/2016/Mar/msg00004.html","http://secunia.com/advisories/62725","http://sourceforge.net/p/png-mng/mailman/message/33173461/","http://tfpwn.com/files/libpng_heap_overflow_1.6.15.txt","http://www.openwall.com/lists/oss-security/2015/01/10/1","http://www.openwall.com/lists/oss-security/2015/01/10/3","http://www.oracle.com/technetwork/topics/security/bulletinjul2015-2511963.html","https://security.netapp.com/advisory/ntap-20240719-0005/","https://support.apple.com/HT206167"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2010-2249">CVE-2010-2249</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.2.44</li>
+                                <li>1.4.3</li>
+                            </ul>
+                        </td>
+                        <td>Memory leak in pngrutil.c in libpng before 1.2.44, and 1.4.x before 1.4.3, allows remote attackers to cause a denial of service (memory consumption and application crash) via a PNG image containing malformed Physical Scale (aka sCAL) chunks.</td>
+                        <td>["http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commitdiff%3Bh=90cfcecc09febb8d6c8c1d37ea7bb7cf0f4b00f3#patch20","http://lists.apple.com/archives/security-announce/2010//Nov/msg00000.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00003.html","http://lists.apple.com/archives/security-announce/2011//Mar/msg00004.html","http://lists.apple.com/archives/security-announce/2011/Mar/msg00000.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044283.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044397.html","http://lists.opensuse.org/opensuse-security-announce/2010-09/msg00006.html","http://lists.vmware.com/pipermail/security-announce/2010/000105.html","http://secunia.com/advisories/40302","http://secunia.com/advisories/40336","http://secunia.com/advisories/40472","http://secunia.com/advisories/40547","http://secunia.com/advisories/41574","http://secunia.com/advisories/42314","http://secunia.com/advisories/42317","http://slackware.com/security/viewer.php?l=slackware-security\u0026y=2010\u0026m=slackware-security.613061","http://support.apple.com/kb/HT4435","http://support.apple.com/kb/HT4456","http://support.apple.com/kb/HT4457","http://support.apple.com/kb/HT4554","http://support.apple.com/kb/HT4566","http://www.debian.org/security/2010/dsa-2072","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2010:133","http://www.securityfocus.com/bid/41174","http://www.securitytracker.com/id?1024723","http://www.ubuntu.com/usn/USN-960-1","http://www.vmware.com/security/advisories/VMSA-2010-0014.html","http://www.vupen.com/english/advisories/2010/1612","http://www.vupen.com/english/advisories/2010/1637","http://www.vupen.com/english/advisories/2010/1755","http://www.vupen.com/english/advisories/2010/1837","http://www.vupen.com/english/advisories/2010/1846","http://www.vupen.com/english/advisories/2010/1877","http://www.vupen.com/english/advisories/2010/2491","http://www.vupen.com/english/advisories/2010/3045","http://www.vupen.com/english/advisories/2010/3046","https://bugzilla.redhat.com/show_bug.cgi?id=608644","https://exchange.xforce.ibmcloud.com/vulnerabilities/59816","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commitdiff%3Bh=90cfcecc09febb8d6c8c1d37ea7bb7cf0f4b00f3#patch20","http://lists.apple.com/archives/security-announce/2010//Nov/msg00000.html","http://lists.apple.com/archives/security-announce/2010//Nov/msg00003.html","http://lists.apple.com/archives/security-announce/2011//Mar/msg00004.html","http://lists.apple.com/archives/security-announce/2011/Mar/msg00000.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044283.html","http://lists.fedoraproject.org/pipermail/package-announce/2010-July/044397.html","http://lists.opensuse.org/opensuse-security-announce/2010-09/msg00006.html","http://lists.vmware.com/pipermail/security-announce/2010/000105.html","http://secunia.com/advisories/40302","http://secunia.com/advisories/40336","http://secunia.com/advisories/40472","http://secunia.com/advisories/40547","http://secunia.com/advisories/41574","http://secunia.com/advisories/42314","http://secunia.com/advisories/42317","http://slackware.com/security/viewer.php?l=slackware-security\u0026y=2010\u0026m=slackware-security.613061","http://support.apple.com/kb/HT4435","http://support.apple.com/kb/HT4456","http://support.apple.com/kb/HT4457","http://support.apple.com/kb/HT4554","http://support.apple.com/kb/HT4566","http://www.debian.org/security/2010/dsa-2072","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2010:133","http://www.securityfocus.com/bid/41174","http://www.securitytracker.com/id?1024723","http://www.ubuntu.com/usn/USN-960-1","http://www.vmware.com/security/advisories/VMSA-2010-0014.html","http://www.vupen.com/english/advisories/2010/1612","http://www.vupen.com/english/advisories/2010/1637","http://www.vupen.com/english/advisories/2010/1755","http://www.vupen.com/english/advisories/2010/1837","http://www.vupen.com/english/advisories/2010/1846","http://www.vupen.com/english/advisories/2010/1877","http://www.vupen.com/english/advisories/2010/2491","http://www.vupen.com/english/advisories/2010/3045","http://www.vupen.com/english/advisories/2010/3046","https://bugzilla.redhat.com/show_bug.cgi?id=608644","https://exchange.xforce.ibmcloud.com/vulnerabilities/59816"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2690">CVE-2011-2690</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.0.55</li>
+                                <li>1.2.45</li>
+                                <li>1.4.8</li>
+                                <li>1.5.4</li>
+                            </ul>
+                        </td>
+                        <td>Buffer overflow in libpng 1.0.x before 1.0.55, 1.2.x before 1.2.45, 1.4.x before 1.4.8, and 1.5.x before 1.5.4, when used by an application that calls the png_rgb_to_gray function but not the png_set_expand function, allows remote attackers to overwrite memory with an arbitrary amount of data, and possibly have unspecified other impact, via a crafted PNG image.</td>
+                        <td>["http://lists.apple.com/archives/Security-announce/2011//Oct/msg00003.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://secunia.com/advisories/45046","http://secunia.com/advisories/45405","http://secunia.com/advisories/45415","http://secunia.com/advisories/45460","http://secunia.com/advisories/45461","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://support.apple.com/kb/HT5002","http://www.debian.org/security/2011/dsa-2287","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/07/13/2","http://www.redhat.com/support/errata/RHSA-2011-1104.html","http://www.redhat.com/support/errata/RHSA-2011-1105.html","http://www.securityfocus.com/bid/48660","http://www.ubuntu.com/usn/USN-1175-1","https://bugzilla.redhat.com/show_bug.cgi?id=720607","https://exchange.xforce.ibmcloud.com/vulnerabilities/68538","http://lists.apple.com/archives/Security-announce/2011//Oct/msg00003.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://secunia.com/advisories/45046","http://secunia.com/advisories/45405","http://secunia.com/advisories/45415","http://secunia.com/advisories/45460","http://secunia.com/advisories/45461","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://support.apple.com/kb/HT5002","http://www.debian.org/security/2011/dsa-2287","http://www.libpng.org/pub/png/libpng.html","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/07/13/2","http://www.redhat.com/support/errata/RHSA-2011-1104.html","http://www.redhat.com/support/errata/RHSA-2011-1105.html","http://www.securityfocus.com/bid/48660","http://www.ubuntu.com/usn/USN-1175-1","https://bugzilla.redhat.com/show_bug.cgi?id=720607","https://exchange.xforce.ibmcloud.com/vulnerabilities/68538"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2017-12652">CVE-2017-12652</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.6.32</li>
+                            </ul>
+                        </td>
+                        <td>libpng before 1.6.32 does not properly check the length of chunks against the user limit.</td>
+                        <td>["http://www.securityfocus.com/bid/109269","https://github.com/glennrp/libpng/blob/df7e9dae0c4aac63d55361e35709c864fa1b8363/ANNOUNCE","https://github.com/pnggroup/libpng/commit/347538efbdc21b8df684ebd92d37400b3ce85d55","https://security.netapp.com/advisory/ntap-20220506-0003/","https://support.f5.com/csp/article/K88124225","https://support.f5.com/csp/article/K88124225?utm_source=f5support\u0026amp;utm_medium=RSS","http://www.securityfocus.com/bid/109269","https://github.com/glennrp/libpng/blob/df7e9dae0c4aac63d55361e35709c864fa1b8363/ANNOUNCE","https://security.netapp.com/advisory/ntap-20220506-0003/","https://support.f5.com/csp/article/K88124225","https://support.f5.com/csp/article/K88124225?utm_source=f5support\u0026amp%3Butm_medium=RSS"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Zlib</td>
+                        <td>1.2.3.2027</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-45853">CVE-2023-45853</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.3.1</li>
+                            </ul>
+                        </td>
+                        <td>MiniZip in zlib through 1.3 has an integer overflow and resultant heap-based buffer overflow in zipOpenNewFileInZip4_64 via a long filename, comment, or extra field. NOTE: MiniZip is not a supported part of the zlib product. NOTE: pyminizip through 0.2.6 is also vulnerable because it bundles an affected zlib version, and exposes the applicable MiniZip code through its compress API.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2023/10/20/9","http://www.openwall.com/lists/oss-security/2024/01/24/10","https://chromium.googlesource.com/chromium/src/+/d709fb23806858847131027da95ef4c548813356","https://chromium.googlesource.com/chromium/src/+/de29dd6c7151d3cd37cb4cf0036800ddfb1d8b61","https://github.com/madler/zlib/blob/ac8f12c97d1afd9bafa9c710f827d40a407d3266/contrib/README.contrib#L1-L4","https://github.com/madler/zlib/pull/843","https://lists.debian.org/debian-lts-announce/2023/11/msg00026.html","https://pypi.org/project/pyminizip/#history","https://security.gentoo.org/glsa/202401-18","https://security.netapp.com/advisory/ntap-20231130-0009/","https://www.winimage.com/zLibDll/minizip.html","http://www.openwall.com/lists/oss-security/2023/10/20/9","http://www.openwall.com/lists/oss-security/2024/01/24/10","https://chromium.googlesource.com/chromium/src/+/d709fb23806858847131027da95ef4c548813356","https://chromium.googlesource.com/chromium/src/+/de29dd6c7151d3cd37cb4cf0036800ddfb1d8b61","https://github.com/madler/zlib/blob/ac8f12c97d1afd9bafa9c710f827d40a407d3266/contrib/README.contrib#L1-L4","https://github.com/madler/zlib/pull/843","https://lists.debian.org/debian-lts-announce/2023/11/msg00026.html","https://pypi.org/project/pyminizip/#history","https://security.gentoo.org/glsa/202401-18","https://security.netapp.com/advisory/ntap-20231130-0009/","https://www.winimage.com/zLibDll/minizip.html"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2013-7354">CVE-2013-7354</a>
+                        </td>
+                        <td>Medium</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>Multiple integer overflows in libpng before 1.5.14rc03 allow remote attackers to cause a denial of service (crash) via a crafted image to the (1) png_set_sPLT or (2) png_set_text_2 function, which triggers a heap-based buffer overflow.</td>
+                        <td>["http://lists.opensuse.org/opensuse-updates/2014-05/msg00015.html","http://seclists.org/oss-sec/2014/q2/83","http://sourceforge.net/p/libpng/bugs/199/","http://www.securityfocus.com/bid/67344","http://lists.opensuse.org/opensuse-updates/2014-05/msg00015.html","http://seclists.org/oss-sec/2014/q2/83","http://sourceforge.net/p/libpng/bugs/199/","http://www.securityfocus.com/bid/67344"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2501">CVE-2011-2501</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.0.55</li>
+                                <li>1.2.45</li>
+                                <li>1.4.8</li>
+                                <li>1.5.4</li>
+                            </ul>
+                        </td>
+                        <td>The png_format_buffer function in pngerror.c in libpng 1.0.x before 1.0.55, 1.2.x before 1.2.45, 1.4.x before 1.4.8, and 1.5.x before 1.5.4 allows remote attackers to cause a denial of service (application crash) via a crafted PNG image that triggers an out-of-bounds read during the copying of error-message data.  NOTE: this vulnerability exists because of a CVE-2004-0421 regression. NOTE: this is called an off-by-one error by some sources.</td>
+                        <td>["http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=65e6d5a34f49acdb362a0625a706c6b914e670af","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/062720.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://secunia.com/advisories/45046","http://secunia.com/advisories/45289","http://secunia.com/advisories/45405","http://secunia.com/advisories/45415","http://secunia.com/advisories/45460","http://secunia.com/advisories/45486","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://slackware.com/security/viewer.php?l=slackware-security\u0026y=2011\u0026m=slackware-security.617466","http://sourceforge.net/mailarchive/forum.php?thread_name=BANLkTikrnU6FJNQYFvwmt78hwpgKPVRd1Q%40mail.gmail.com\u0026forum_name=png-mng-implement","http://www.debian.org/security/2011/dsa-2287","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/06/27/13","http://www.openwall.com/lists/oss-security/2011/06/28/16","http://www.redhat.com/support/errata/RHSA-2011-1105.html","http://www.securityfocus.com/bid/48474","http://www.ubuntu.com/usn/USN-1175-1","https://bugzilla.redhat.com/show_bug.cgi?id=717084","https://exchange.xforce.ibmcloud.com/vulnerabilities/68517","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commit%3Bh=65e6d5a34f49acdb362a0625a706c6b914e670af","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/062720.html","http://lists.fedoraproject.org/pipermail/package-announce/2011-July/063118.html","http://secunia.com/advisories/45046","http://secunia.com/advisories/45289","http://secunia.com/advisories/45405","http://secunia.com/advisories/45415","http://secunia.com/advisories/45460","http://secunia.com/advisories/45486","http://secunia.com/advisories/45492","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://slackware.com/security/viewer.php?l=slackware-security\u0026y=2011\u0026m=slackware-security.617466","http://sourceforge.net/mailarchive/forum.php?thread_name=BANLkTikrnU6FJNQYFvwmt78hwpgKPVRd1Q%40mail.gmail.com\u0026forum_name=png-mng-implement","http://www.debian.org/security/2011/dsa-2287","http://www.mandriva.com/security/advisories?name=MDVSA-2011:151","http://www.openwall.com/lists/oss-security/2011/06/27/13","http://www.openwall.com/lists/oss-security/2011/06/28/16","http://www.redhat.com/support/errata/RHSA-2011-1105.html","http://www.securityfocus.com/bid/48474","http://www.ubuntu.com/usn/USN-1175-1","https://bugzilla.redhat.com/show_bug.cgi?id=717084","https://exchange.xforce.ibmcloud.com/vulnerabilities/68517"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2009-5063">CVE-2009-5063</a>
+                        </td>
+                        <td>Medium</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>Memory leak in the embedded_profile_len function in pngwutil.c in libpng before 1.2.39beta5 allows context-dependent attackers to cause a denial of service (memory leak or segmentation fault) via a JPEG image containing an iCCP chunk with a negative embedded profile length.  NOTE: this is due to an incomplete fix for CVE-2006-7244.</td>
+                        <td>["http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commitdiff%3Bh=948ee23a2a400672b1751cfc646a7467741e9b2e#patch18","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://www.openwall.com/lists/oss-security/2011/03/22/7","http://www.openwall.com/lists/oss-security/2011/03/28/6","http://libpng.git.sourceforge.net/git/gitweb.cgi?p=libpng/libpng%3Ba=commitdiff%3Bh=948ee23a2a400672b1751cfc646a7467741e9b2e#patch18","http://secunia.com/advisories/49660","http://security.gentoo.org/glsa/glsa-201206-15.xml","http://www.openwall.com/lists/oss-security/2011/03/22/7","http://www.openwall.com/lists/oss-security/2011/03/28/6"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2013-7353">CVE-2013-7353</a>
+                        </td>
+                        <td>Medium</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>Integer overflow in the png_set_unknown_chunks function in libpng/pngset.c in libpng before 1.5.14beta08 allows context-dependent attackers to cause a denial of service (segmentation fault and crash) via a crafted image, which triggers a heap-based buffer overflow.</td>
+                        <td>["http://lists.opensuse.org/opensuse-updates/2014-05/msg00015.html","http://seclists.org/oss-sec/2014/q2/83","http://sourceforge.net/p/libpng/bugs/199/","http://www.securityfocus.com/bid/67345","http://lists.opensuse.org/opensuse-updates/2014-05/msg00015.html","http://seclists.org/oss-sec/2014/q2/83","http://sourceforge.net/p/libpng/bugs/199/","http://www.securityfocus.com/bid/67345"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>Zlib</td>
+                        <td>1.2.3.2027</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2018-25032">CVE-2018-25032</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>1.2.12</li>
+                            </ul>
+                        </td>
+                        <td>zlib before 1.2.12 allows memory corruption when deflating (i.e., when compressing) if the input has many distant matches.</td>
+                        <td>["http://seclists.org/fulldisclosure/2022/May/33","http://seclists.org/fulldisclosure/2022/May/35","http://seclists.org/fulldisclosure/2022/May/38","http://www.openwall.com/lists/oss-security/2022/03/25/2","http://www.openwall.com/lists/oss-security/2022/03/26/1","https://cert-portal.siemens.com/productcert/pdf/ssa-333517.pdf","https://github.com/madler/zlib/commit/5c44459c3b28a9bd3283aaceab7c615f8020c531","https://github.com/madler/zlib/compare/v1.2.11...v1.2.12","https://github.com/madler/zlib/issues/605","https://lists.debian.org/debian-lts-announce/2022/04/msg00000.html","https://lists.debian.org/debian-lts-announce/2022/05/msg00008.html","https://lists.debian.org/debian-lts-announce/2022/09/msg00023.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/DCZFIJBJTZ7CL5QXBFKTQ22Q26VINRUF/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/DF62MVMH3QUGMBDCB3DY2ERQ6EBHTADB/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/JZZPTWRYQULAOL3AW7RZJNVZ2UONXCV4/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/NS2D2GFPFGOJUL4WQ3DUAY7HF4VWQ77F/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/VOKNP2L734AEL47NRYGVZIKEFOUBQY5Y/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/XOKFMSNQ5D5WGMALBNBXU3GE442V74WU/","https://security.gentoo.org/glsa/202210-42","https://security.netapp.com/advisory/ntap-20220526-0009/","https://security.netapp.com/advisory/ntap-20220729-0004/","https://support.apple.com/kb/HT213255","https://support.apple.com/kb/HT213256","https://support.apple.com/kb/HT213257","https://www.debian.org/security/2022/dsa-5111","https://www.openwall.com/lists/oss-security/2022/03/24/1","https://www.openwall.com/lists/oss-security/2022/03/28/1","https://www.openwall.com/lists/oss-security/2022/03/28/3","https://www.oracle.com/security-alerts/cpujul2022.html","http://seclists.org/fulldisclosure/2022/May/33","http://seclists.org/fulldisclosure/2022/May/35","http://seclists.org/fulldisclosure/2022/May/38","http://www.openwall.com/lists/oss-security/2022/03/25/2","http://www.openwall.com/lists/oss-security/2022/03/26/1","https://cert-portal.siemens.com/productcert/pdf/ssa-333517.pdf","https://github.com/madler/zlib/commit/5c44459c3b28a9bd3283aaceab7c615f8020c531","https://github.com/madler/zlib/compare/v1.2.11...v1.2.12","https://github.com/madler/zlib/issues/605","https://lists.debian.org/debian-lts-announce/2022/04/msg00000.html","https://lists.debian.org/debian-lts-announce/2022/05/msg00008.html","https://lists.debian.org/debian-lts-announce/2022/09/msg00023.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/DCZFIJBJTZ7CL5QXBFKTQ22Q26VINRUF/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/DF62MVMH3QUGMBDCB3DY2ERQ6EBHTADB/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/JZZPTWRYQULAOL3AW7RZJNVZ2UONXCV4/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/NS2D2GFPFGOJUL4WQ3DUAY7HF4VWQ77F/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/VOKNP2L734AEL47NRYGVZIKEFOUBQY5Y/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/XOKFMSNQ5D5WGMALBNBXU3GE442V74WU/","https://security.gentoo.org/glsa/202210-42","https://security.netapp.com/advisory/ntap-20220526-0009/","https://security.netapp.com/advisory/ntap-20220729-0004/","https://support.apple.com/kb/HT213255","https://support.apple.com/kb/HT213256","https://support.apple.com/kb/HT213257","https://www.debian.org/security/2022/dsa-5111","https://www.openwall.com/lists/oss-security/2022/03/24/1","https://www.openwall.com/lists/oss-security/2022/03/28/1","https://www.openwall.com/lists/oss-security/2022/03/28/3","https://www.oracle.com/security-alerts/cpujul2022.html"]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>LibPng</td>
+                        <td>1.2.37.3442</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2016-3751">CVE-2016-3751</a>
+                        </td>
+                        <td>High</td>
+                        <td></td>
+                        <td>
+                            N/A
+                        </td>
+                        <td>Unspecified vulnerability in libpng before 1.6.20, as used in Android 4.x before 4.4.4, 5.0.x before 5.0.2, 5.1.x before 5.1.1, and 6.x before 2016-07-01, allows attackers to gain privileges via a crafted application, as demonstrated by obtaining Signature or SignatureOrSystem access, aka internal bug 23265085.</td>
+                        <td>["http://source.android.com/security/bulletin/2016-07-01.html","http://www.openwall.com/lists/oss-security/2016/07/09/4","https://android.googlesource.com/platform/external/libpng/+/9d4853418ab2f754c2b63e091c29c5529b8b86ca","https://security.netapp.com/advisory/ntap-20240719-0004/","http://source.android.com/security/bulletin/2016-07-01.html","http://www.openwall.com/lists/oss-security/2016/07/09/4","https://android.googlesource.com/platform/external/libpng/+/9d4853418ab2f754c2b63e091c29c5529b8b86ca","https://security.netapp.com/advisory/ntap-20240719-0004/"]</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+
+    // ================================================
+    // DataTables Core Logic & Callbacks
+    // ================================================
+
+    /**
+     * Initializes the main DataTable instance (#vulnerabilityTable) with configuration
+     * for responsiveness, buttons (PDF, Excel), dynamic page length calculation,
+     * column definitions, severity filtering, and other display settings.
+     */
+    function initDataTable() {
+        // Target the table element
+        const tableElement = $('#vulnerabilityTable');
+        
+        // Destroy existing DataTable instance if it exists, to prevent reinitialization errors
+        if ($.fn.dataTable.isDataTable(tableElement)) {
+            tableElement.DataTable().destroy();
+        }
+
+        const table = tableElement.DataTable({
+            // Responsive Extension Configuration
+            responsive: {
+                details: {
+                    type: 'inline',
+                    // Use the custom renderer function for child row content
+                    renderer: renderChildRowDetailsDt
+                }
+            },
+            // DOM Structure Definition (Controls placement)
+            // B: Buttons, f: Filter input, t: Table, i: Info, p: Pagination
+            // Custom wrappers for styling/control: dataTables_wrapper, dataTables_control
+            dom: '<"dataTables_wrapper"Bf>t<"dataTables_control"ip>',
+
+            // Language Configuration
+            language: {
+                search: "", // Hide the default "Search:" label
+                searchPlaceholder: "Search vulnerabilities..." // Set custom placeholder
+            },
+
+            // Initial Sorting Order (Sort by Name column, ascending)
+            order: [[0, 'asc']],
+
+            // Column Definitions (retrieved from helper function)
+            columnDefs: getColumnDefsDt(),
+
+            // Callback after table initialization is complete
+            initComplete: function(settings, json) {
+                // Calculate and set initial page length based on viewport height
+                setDynamicPageLengthDt(this.api());
+            },
+
+            // Callback after each table draw (including pagination, filtering, sorting)
+            drawCallback: function (settings) {
+                const api = this.api();
+                const pageInfo = api.page.info();
+
+                // Target the specific wrapper for pagination controls
+                const controlsWrapper = $(api.table().container()).find('.dataTables_control');
+
+                // Hide pagination controls if there's only one page
+                if (controlsWrapper.length) { // Ensure wrapper exists
+                     controlsWrapper.toggle(pageInfo.pages > 1);
+                }
+            },
+
+            // Buttons Configuration (Export functionality)
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    text: '<span class="vscode-icons--file-type-pdf2"></span>', // Use Iconify span
+                    titleAttr: 'Export to PDF',                   // Tooltip
+                    title: function () { return getReportMetadata().title; },
+                    messageTop: function () { return getReportMetadata().message; },
+                    filename: function () {
+                        return `vulnerability-report-${getReportMetadata().safeName}`;
+                    },
+                    exportOptions: {
+                        // Specify columns to include by name (more robust than index)
+                        // Excludes control, Description, PURL, Related URLs from PDF
+                        columns: [
+                            'Name:name',
+                            'Version:name',
+                            'Type:name',
+                            'Vulnerability:name',
+                            'Severity:name',
+                            'State:name',
+                            'Fixed In:name'
+                        ]
+                    },
+                    customize: function (doc) {
+                        // PDF customization: left-align content, adjust widths
+                        doc.styles.tableHeader.alignment = 'left';
+                        doc.defaultStyle.alignment = 'left';
+                        // Relative widths: Name, Vuln, FixedIn get more space
+                        doc.content[doc.content.length - 1].table.widths = ['*', 'auto', 'auto', '*', 'auto', 'auto', '*'];
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<span class="vscode-icons--file-type-excel"></span>', // Use Iconify span
+                    titleAttr: 'Export to Excel',                    // Tooltip
+                    title: function () { return getReportMetadata().title; },
+                    messageTop: function () { return getReportMetadata().message; },
+                    filename: function () {
+                        return `vulnerability-report-${getReportMetadata().safeName}`;
+                    },
+                    exportOptions: {
+                        // Specify columns to include by name for Excel
+                        // Includes PURL and Related URLs in Excel export
+                         columns: [
+                            'Name:name',
+                            'Version:name',
+                            'Type:name',
+                            'Vulnerability:name',
+                            'Severity:name', 
+                            'State:name',
+                            'Fixed In:name',
+                            'Related URLs:name',
+                            'PURL:name'
+                        ]
+                    }
+                }
+            ]
+        });
+
+        // Setup the click handlers for the severity filter boxes
+        initSeverityFilteringDt(table);
+
+        // --- Resize Listener for Dynamic Page Length ---
+        // Create a debounced version of the page length calculation
+         const dtInstance = table; // Reference the table instance
+         const debouncedPageLengthHandler = debounce(function() {
+             // Ensure the DataTable instance still exists before calculating
+             if ($.fn.dataTable.isDataTable(tableElement)) {
+                setDynamicPageLengthDt(dtInstance);
+             }
+        }, 250); // Delay execution by 250ms after the last resize event
+
+        // Attach the debounced handler to the window resize event
+        window.addEventListener('resize', debouncedPageLengthHandler);
+    }
+
+    /**
+     * Defines the column configurations for the DataTables instance.
+     * Specifies properties like name, target index, visibility, searchability,
+     * rendering functions, cell creation callbacks, and responsive priority.
+     *
+     * @returns {Array<object>} An array of DataTables column definition objects.
+     */
+    function getColumnDefsDt() {
+        return [
+            // Column 0: Name
+            {
+                name: 'Name',
+                targets: 0,
+                searchable: true,
+                responsivePriority: 1
+            },
+            // Column 1: Version
+            {
+                name: 'Version',
+                targets: 1,
+                searchable: true,
+                responsivePriority: 5
+            },
+            // Column 2: Type
+            {
+                name: 'Type',
+                targets: 2,
+                render: function (data, type, row) { return data; },
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).html(formatTypeCell(cellData));
+                },
+                searchable: false,
+                responsivePriority: 6
+            },
+            // Column 3: Vulnerability ID
+            {
+                name: 'Vulnerability',
+                targets: 3,
+                searchable: true,
+                responsivePriority: 2
+            },
+            // Column 4: Severity
+            {
+                name: 'Severity',
+                targets: 4,
+                // Render raw data; formatting is handled by createdCell and renderChildRowDetails
+                render: function (data, type, row) { return data; },
+                // Apply pill formatting using helper function after cell is created
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).html(formatPill(cellData, 'severity'));
+                },
+                searchable: true,
+                responsivePriority: 3
+            },
+            // Column 5: State
+            {
+                name: 'State',
+                targets: 5,
+                 // Render raw data
+                render: function (data, type, row) { return data; },
+                 // Apply pill formatting using helper function after cell is created
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).html(formatPill(cellData, 'state'));
+                },
+                searchable: true,
+                responsivePriority: 4
+            },
+            // Column 7: Fixed In Version(s)
+            {
+                name: 'Fixed In',
+                targets: 6,
+                 // Add class to apply styling
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).addClass('fixed-in');
+                },
+                searchable: true,
+                responsivePriority: 7
+            },
+             // --- Columns initially hidden, shown in child row by default ---
+             // They are excluded from responsivity using className: 'none'
+            {
+                name: 'Description',
+                targets: 7,
+                searchable: true,
+                className: 'none', // Tell Responsive to hide this column initially
+            },
+            {
+                name: 'Related URLs',
+                targets: 8,
+                searchable: false,
+                className: 'none', // Tell Responsive to hide this column initially
+            },
+            {
+                name: 'PURL',
+                targets: 9,
+                searchable: false,
+                className: 'none', // Tell Responsive to hide this column initially
+            },
+        ];
+    }
+
+    /**
+     * Custom renderer function for DataTables Responsive extension.
+     * Generates the HTML content for the child row displayed when a row collapses.
+     * It iterates through the columns marked as 'hidden' by Responsive for the
+     * current row and formats their data appropriately (using helpers like
+     * formatPill and formatUrlList) before combining them into a single HTML block.
+     *
+     * @param {DataTables.Api} api - The DataTables API instance.
+     * @param {number} rowIndex - The index of the row being rendered.
+     * @param {Array<object>} columns - An array of column objects provided by Responsive,
+     *                                  indicating which columns are hidden ({columnIndex, title, hidden}).
+     * @returns {string|false} The HTML string for the child row content, or false if no content is generated.
+     */
+    function renderChildRowDetailsDt( api, rowIndex, columns ) {
+        // We will get data cell-by-cell using the correct API.
+        let finalHtml = '';
+
+        // Iterate through the column information provided by the Responsive extension
+        columns.forEach(function(col) {
+            // Only process columns that are currently hidden by Responsive for this specific row
+            if (col.hidden) {
+                const index = col.columnIndex; // Original index of the column (0-based)
+                const title = col.title;       // Column title (from <thead> or columnDefs name)
+                
+                // --- Use api.cell(rowIndex, columnIndex).data() for robust data retrieval ---
+                const data = api.cell(rowIndex, index).data();
+                
+                let contentHtml = ''; // HTML for this specific column's content
+
+                // Apply specific formatting based on the original column index
+                switch (index) {
+                    case 2: // Type
+                        contentHtml = formatTypeCell(data);
+                        break;
+                    case 4: // Severity
+                        contentHtml = formatPill(data, 'severity');
+                        break;
+                    case 5: // State
+                        contentHtml = formatPill(data, 'state');
+                        break;
+                     case 7: // Description
+                         // Ensure data exists before trying to format
+                         contentHtml = data ? String(data) : ''; 
+                         break;
+                    case 8: // Related URLs
+                        contentHtml = formatUrlList(data); // formatUrlList handles empty/invalid data
+                        break;
+                    default:
+                         // Check if data exists and is not null/undefined before displaying
+                         if (data !== null && data !== undefined) {
+                             contentHtml = String(data); // Convert to string just in case
+                         }
+                         break;
+                }
+
+                // Add the formatted content to the final HTML, wrapped in a div with a title
+                // Only add if contentHtml was actually generated (e.g., empty URLs or null data won't add a section)
+                if (contentHtml) {
+                    finalHtml += `<div class="child-row-details"><b>${title}</b><br>${contentHtml}</div>`;
+                }
+            }
+        });
+
+        // Return the generated HTML (if any content was added), otherwise false
+        // Returning false tells Responsive not to show a child row if there's nothing to display
+        return finalHtml ? finalHtml : false;
+    }
+
+    /**
+     * Attaches click handlers to the severity overview boxes.
+     * Clicking a box adds/removes its severity from the active filter set.
+     * Updates the DataTable to show rows matching *any* of the selected severities.
+     * Highlights the active severity boxes.
+     *
+     * @param {DataTables.Api} table - The DataTables API instance.
+     */
+    function initSeverityFilteringDt(table) {
+        let activeSeverityFilters = []; // Use an array to track multiple selections
+        const severityBoxes = $('.severity-box'); // Cache selector
+
+        severityBoxes.on('click', function () {
+            const clickedBox = $(this);
+            const severity = clickedBox.find('.severity-title').text().trim();
+            const severityIndex = activeSeverityFilters.indexOf(severity);
+
+            // Toggle severity in the active filter list
+            if (severityIndex > -1) {
+                // Severity is currently active, remove it
+                activeSeverityFilters.splice(severityIndex, 1);
+                clickedBox.removeClass('active');
+            } else {
+                // Severity is not active, add it
+                activeSeverityFilters.push(severity);
+                clickedBox.addClass('active');
+            }
+
+            // Clear any global search and previous column searches
+            table.search('').columns().search('');
+
+            // Apply the combined severity filter to column 5 (Severity)
+            if (activeSeverityFilters.length > 0) {
+                // Create a regex string like "^Critical$|^High$|^Medium$"
+                // This ensures exact matches for each selected severity
+                const filterRegex = activeSeverityFilters.map(sev => `^${sev}$`).join('|');
+                table.column(4).search(filterRegex, true, false); // Enable regex, disable smart search
+            } else {
+                // If no filters are active, clear the specific column search
+                table.column(4).search('');
+            }
+            
+            // Redraw the table to apply the filter changes
+            table.draw();
+        });
+    }
+
+    /**
+     * Calculates the optimal number of rows to display in the DataTable based on
+     * available viewport height and sets the table's page length accordingly.
+     * It subtracts the height of the table header, pagination controls, and a
+     * fixed buffer from the total viewport height to determine the space available
+     * for table rows. Ensures at least one row is shown if space permits.
+     *
+     * @param {DataTables.Api} table - The DataTables API instance for the table.
+     */
+    function setDynamicPageLengthDt(table) {
+        try {
+            const tableWrapper = table.table().container();
+            const tableBody = table.table().body();
+            const controls = $(tableWrapper).find('.dataTables_control')[0];
+
+            // If the table is not visible, don't calculate the page length
+            if (!tableWrapper || !tableBody || !tableBody.rows.length) {
+                return;
+            }
+
+            const firstRow = tableBody.rows[0];
+            const rowHeight = firstRow.offsetHeight;
+
+            // If the row height is not valid, don't calculate the page length
+            if (!rowHeight || rowHeight <= 0) {
+                return;
+            }
+
+            // Measure heights and positions
+            const controlsHeight = controls ? $(controls).outerHeight(true) : 0; // Height of pagination controls
+            const tableBodyTopOffset = tableBody.getBoundingClientRect().top; // Vertical position of the tbody relative to viewport
+            const verticalBuffer = 60; // Pixels to leave empty below the table for aesthetics
+
+            // Calculate available height for rows
+            const availableHeight = window.innerHeight - tableBodyTopOffset - controlsHeight - verticalBuffer;
+
+            // If there's not enough available height, don't calculate the page length
+            if (availableHeight <= 0) {
+                return;
+            }
+
+            // Calculate how many rows fit and ensure at least 1
+            const calculatedNumberOfRows = Math.floor(availableHeight / rowHeight);
+            const numberOfRowsToShow = Math.max(1, calculatedNumberOfRows);
+
+            // Apply the new page length only if it has changed
+            const currentPageLength = table.page.len();
+            if (currentPageLength !== numberOfRowsToShow) {
+                table.page.len(numberOfRowsToShow).draw(false);
+            }
+
+        } catch (error) {
+            console.error("Error calculating page length:", error);
+        }
+    }
+
+    // ================================================
+    // UI Formatting & Utility Helpers
+    // ================================================
+
+    /**
+     * Formats the original ISO timestamp from the #dateElement into a human-readable
+     * format (e.g., "Monday, January 1, 2024 at 12:00 PM") and displays it in
+     * the #prettyDateElement, hiding the original element.
+     */
+    function renderFormattedTimestamp() {
+        const originalDateElement = document.getElementById("dateElement");
+        const prettyDateElement = document.getElementById("prettyDateElement");
+
+        // Ensure both elements exist
+        if (!originalDateElement || !prettyDateElement) {
+            console.error("prettyTimestamp: Date elements not found.");
+            return;
+        }
+
+        const dateString = originalDateElement.textContent;
+        if (!dateString) {
+            console.warn("prettyTimestamp: Original date string is empty.");
+            // Optionally hide the pretty date element or show 'N/A'
+            prettyDateElement.textContent = 'N/A';
+            prettyDateElement.style.display = '';
+            originalDateElement.style.display = 'none';
+            return;
+        }
+
+        try {
+            const date = new Date(dateString);
+
+            // Check for invalid date
+            if (isNaN(date.getTime())) {
+                console.warn("prettyTimestamp: Invalid date string:", dateString);
+                prettyDateElement.textContent = 'Invalid Date';
+                prettyDateElement.style.display = '';
+                originalDateElement.style.display = 'none';
+                return;
+            }
+
+            // Format date to a more human-readable form
+            const formattedDate = date.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
+
+            const formattedTime = date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            });
+
+            // Update the content of the pretty date element
+            prettyDateElement.textContent = `${formattedDate} at ${formattedTime}`;
+
+            // Hide the original and show the pretty one
+            originalDateElement.style.display = 'none';
+            prettyDateElement.style.display = ''; // Reset to default (inline)
+
+        } catch (error) {
+             console.error("prettyTimestamp: Error formatting date:", error);
+             prettyDateElement.textContent = 'Error'; // Indicate an error occurred
+             prettyDateElement.style.display = '';
+             originalDateElement.style.display = 'none';
+        }
+    }
+
+    /**
+     * Extracts report metadata (title, name, type, checksum, date) from DOM elements.
+     * Formats the data for use in report exports (PDF, Excel messageTop) and
+     * generates a sanitized version of the name for use in filenames.
+     *
+     * @returns {object} An object containing report metadata:
+     *                   { title: string, message: string, name: string, safeName: string }
+     */
+    function getReportMetadata() {
+        // Query elements safely
+        const titleElem = document.querySelector('.report-title');
+        const nameElem = document.getElementById('nameValue');
+        const typeElem = document.getElementById('typeValue');
+        const checksumElem = document.getElementById('checksumValue');
+        const dateElem = document.getElementById('prettyDateElement');
+
+        // Extract text content with fallbacks
+        const title = titleElem ? titleElem.textContent.trim() : 'Vulnerability Report';
+        const name = nameElem ? nameElem.textContent.trim() : 'N/A';
+        const type = typeElem ? typeElem.textContent.trim() : 'N/A';
+        const checksum = checksumElem ? checksumElem.textContent.trim() : 'N/A';
+        const dateText = dateElem ? dateElem.textContent.trim() : 'N/A';
+
+        // Sanitize the name for use as a filename (allow letters, numbers, ., _, -)
+        const safeName = name.replace(/[^a-z0-9._-]+/gi, '_').replace(/_+/g, '_');
+
+        // Construct the message string for export headers
+        let message = `Name: ${name}\n`;
+        message += `Type: ${type}\n`;
+        if (checksumElem && checksum !== 'N/A') {
+            message += `Checksum: ${checksum}\n`;
+        }
+        message += `Date: ${dateText}\n\n`;
+
+        return {
+            title,    // Report title
+            message,  // Formatted multi-line message for export header
+            name,     // Original name
+            safeName  // Sanitized name for filename
+        };
+    }
+
+    /**
+     * Generates HTML for a styled "pill" element used to display Severity or State.
+     * Applies appropriate CSS classes based on the data value and type.
+     *
+     * @param {string} data - The data value (e.g., "Critical", "fixed").
+     * @param {string} type - The type of pill ('severity' or 'state').
+     * @returns {string} HTML string for the styled span element.
+     */
+    function formatPill(data, type) {
+        // Define mappings from data values to CSS classes
+        const severityClasses = {'Critical': 'critical','High': 'high','Medium': 'medium','Low': 'low','Unknown': 'unknown'};
+        const stateClasses = {'fixed': 'fixed','not-fixed': 'not-fixed','unknown': 'unknown','wont-fix': 'wont-fix'};
+
+        let baseClass = '';
+        let specificClass = '';
+        let text = data || 'Unknown'; // Use 'Unknown' as default text if data is falsy
+
+        // Determine base class and specific class based on type
+        if (type === 'severity') {
+            baseClass = 'severity-pill';
+            // Use provided data, fallback to 'Unknown' class if data is not in map
+            specificClass = severityClasses[data] || 'unknown';
+        } else if (type === 'state') {
+            baseClass = 'state-pill';
+             // Normalize state data to lower case for matching, fallback to 'unknown' class
+            specificClass = stateClasses[String(data).toLowerCase()] || 'unknown';
+        } else {
+            // If type is unknown, return the raw text without formatting
+             console.warn(`formatPill: Unknown type "${type}" for data "${data}"`);
+            return text;
+        }
+
+        // Construct and return the HTML span element
+        // Use text content that was determined (might be 'Unknown')
+        return `<span class="${baseClass} ${specificClass}">${text}</span>`;
+    }
+
+    /**
+     * Parses a JSON string containing an array of URLs and formats them
+     * into an HTML unordered list (<ul>). Handles potential JSON parsing errors.
+     * URLs starting with 'http' are made into clickable links. Other strings
+     * are displayed as plain text list items.
+     *
+     * @param {string} data - A JSON string representing an array of URLs/strings, or null/undefined.
+     * @returns {string} An HTML string containing the <ul> list, or an empty string if no valid URLs are found or parsing fails.
+     */
+    function formatUrlList(data) {
+        let urls = [];
+        // Safely parse the JSON data
+        try {
+            // Only attempt parsing if data is a non-empty string
+            if (data && typeof data === 'string') {
+                urls = JSON.parse(data);
+            }
+        } catch (error) {
+            console.error("Failed to parse Related URLs JSON:", data, error);
+            urls = []; // Ensure urls is an array on error
+        }
+
+        let listHtml = '';
+        // Ensure urls is an array before proceeding
+        if (Array.isArray(urls) && urls.length > 0) {
+            listHtml += '<ul>';
+            urls.forEach(url => {
+                // Check if the item is a valid, non-empty string
+                if (url && typeof url === 'string') {
+                     // Check if it looks like a clickable URL
+                    if (url.startsWith('http://') || url.startsWith('https://')) {
+                        // Create a link, escaping URL for safety (though usually fine here)
+                        // Add rel="noopener noreferrer" for security when using target="_blank"
+                        listHtml += `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></li>`;
+                    } else {
+                        // Display other strings as plain text list items
+                        listHtml += `<li>${url}</li>`;
+                    }
+                }
+            });
+            listHtml += '</ul>';
+        }
+        return listHtml;
+    }
+
+    /**
+     * Returns a function, that, as long as it continues to be invoked, will not
+     * be triggered. The function will be called after it stops being called for
+     * N milliseconds. If `immediate` is passed, trigger the function on the
+     * leading edge, instead of the trailing.
+     *
+     * @param {Function} func - The function to debounce.
+     * @param {number} wait - The number of milliseconds to delay.
+     * @param {boolean} [immediate=false] - Trigger the function on the leading edge.
+     * @returns {Function} The debounced function.
+     */
+    function debounce(func, wait, immediate = false) {
+        let timeout;
+
+        return function executedFunction() {
+            const context = this;
+            const args = arguments;
+
+            const later = function() {
+                timeout = null;
+                if (!immediate) {
+                    func.apply(context, args);
+                }
+            };
+
+            const callNow = immediate && !timeout;
+
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+
+            if (callNow) {
+                func.apply(context, args);
+            }
+        };
+    };
+
+    /**
+    * Icon mapping for different package types.
+    * Uses Devicon classes where available, otherwise a fallback span.
+    */
+    const packageTypeIcons = {
+        'alpm': { type: 'icon', class: 'devicon-archlinux-plain colored' },
+        'apk': { type: 'fallback', class: 'iconify-file-icons--alpine-linux' },
+        'cocoapods': { type: 'icon', class: 'devicon-apple-original colored' },
+        'composer': { type: 'icon', class: 'devicon-composer-line colored' },
+        'conan': { type: 'icon', class: 'devicon-cplusplus-plain' },
+        'deb': { type: 'icon', class: 'devicon-debian-plain colored' },
+        'dotnet': { type: 'icon', class: 'devicon-dotnetcore-plain colored' },
+        'gem': { type: 'icon', class: 'devicon-ruby-plain colored' },
+        'go-module': { type: 'icon', class: 'devicon-go-original-wordmark colored' },
+        'haskell': { type: 'icon', class: 'devicon-haskell-plain colored' },
+        'hex': { type: 'icon', class: 'devicon-elixir-plain colored' },
+        'java': { type: 'icon', class: 'devicon-java-plain colored' },
+        'jenkins-plugin': { type: 'icon', class: 'devicon-jenkins-line' },
+        'linux-kernel-module': { type: 'icon', class: 'devicon-linux-plain colored' },
+        'lua': { type: 'icon', class: 'devicon-lua-plain colored' },
+        'npm': { type: 'icon', class: 'devicon-npm-original-wordmark colored' },
+        'nix': { type: 'icon', class: 'devicon-nixos-plain colored' },
+        'portage': { type: 'icon', class: 'devicon-gentoo-plain colored' },
+        'pub': { type: 'icon', class: 'devicon-dart-plain colored' },
+        'python': { type: 'icon', class: 'devicon-python-plain colored' },
+        'rpm': { type: 'icon', class: 'devicon-redhat-plain colored' },
+        'rust-crate': { type: 'icon', class: 'devicon-rust-plain colored' },
+        'swift': { type: 'icon', class: 'devicon-swift-plain colored' },
+        'wordpress-plugin': { type: 'icon', class: 'devicon-wordpress-plain colored' },
+        'github-action': { type: 'icon', class: 'devicon-github-original colored' },
+        'binary': { type: 'fallback', class: 'iconify-noto--package' },
+        'buildroot': { type: 'fallback', class: 'iconify-noto--package' },
+        'graalvm-native-image': { type: 'fallback', class: 'iconify-noto--package' },
+        'kb': { type: 'icon', class: 'devicon-windows11-original colored' },
+        // Fallback for unknown types will be handled in formatTypeCell
+    };
+
+    /**
+     * Generates HTML for a package type cell, including an icon.
+     *
+     * @param {string} data - The package type string (e.g., "java", "npm").
+     * @returns {string} HTML string for the formatted cell content.
+     */
+    function formatTypeCell(data) {
+        const typeKey = data ? String(data).toLowerCase() : 'unknown'; // Normalize key
+        const iconInfo = packageTypeIcons[typeKey];
+        const fallbackInfo = { type: 'fallback', class: 'noto--package' };
+        const chosenInfo = iconInfo || fallbackInfo;
+
+        let iconHtml = '';
+        if (chosenInfo.type === 'icon') {
+            iconHtml = `<i class="${chosenInfo.class}"></i>`;
+        } else { // fallback
+            iconHtml = `<span class="icon-span ${chosenInfo.class}"></span>`;
+        }
+
+        return `<span class="pkg-type-cell">${iconHtml}<span>${data}</span></span>`;
+    }
+
+    // ================================================
+    // Main Execution
+    // ================================================
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Update the browser page title dynamically using report name
+        const headerInfo = getReportMetadata();
+        if (headerInfo && headerInfo.safeName && headerInfo.safeName !== 'N_A') {
+            document.title = `Vulnerability Report (${headerInfo.safeName})`;
+        } else {
+            document.title = `Vulnerability Report`;
+        }
+
+        // 2. Format the timestamp in the header
+        renderFormattedTimestamp();
+
+        // 3. Initialize the main DataTable
+        initDataTable();
+        
+    });
+
+
+
+    </script>
+
+</body>
+
+</html>

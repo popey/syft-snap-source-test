@@ -1,0 +1,2243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Vulnerability Report</title>
+
+    <!-- Template Metadata-->
+    <meta name="author" content="grype">
+    <meta name="version" content="1.0.0">
+
+    <!-- Source DataTables.js and its dependencies -->
+    <!-- Styling: DataTables | Packages: Jquery | Core: DataTables | Extensions: Buttons, HTML5 Export, JSZip, PDFmake, Responsive -->
+    <link href="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.3.0/b-3.2.3/b-html5-3.2.3/r-3.0.4/datatables.min.css" rel="stylesheet" integrity="sha384-i3FrIG8iE4wl9Hmwo+yL2xgtj0L+/QgCSGfIAJbuoowqsGIdhIpg9ax2eizUyCZw" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js" integrity="sha384-VFQrHzqBh5qiJIU0uGU5CIW3+OWpdGGJM9LBnGbuIH2mkICcFZ7lPd/AAtI7SNf7" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js" integrity="sha384-/RlQG9uf0M2vcTw3CX7fbqgbj/h8wKxw7C3zu9/GxcBPRKOEcESxaxufwRXqzq6n" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-2.3.0/b-3.2.3/b-html5-3.2.3/r-3.0.4/datatables.min.js" integrity="sha384-uD0xNCd/C2vKjG5NDZ8BdHFubelfW0p6XH+6n7crJnbQcPP6aUw5MJ3WfEZFz3bA" crossorigin="anonymous"></script>
+    
+    <!-- Include Devicon (for specific tech icons) - Using @latest -->
+    <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@2.16.0/devicon.min.css" /> 
+    
+    <!-- Preload SVG icons used in CSS -->
+    <link rel="preload" href="https://api.iconify.design/noto:package.svg" as="image">
+    <link rel="preload" href="https://api.iconify.design/file-icons:alpine-linux.svg" as="image">
+    <link rel="preload" href="https://api.iconify.design/vscode-icons:file-type-excel.svg" as="image">
+    <link rel="preload" href="https://api.iconify.design/vscode-icons:file-type-pdf2.svg" as="image">
+
+    <!-- Font Awesome for search icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- CSS Variables for Theming -->
+    <style>
+        /* Root variables for light theme */
+        :root {
+            --bg-color: #f4f4f4;
+            --text-color: #333;
+            --container-bg: #fff;
+            --container-shadow: rgba(0, 0, 0, 0.1);
+            --header-bg: #e8f0fe;
+            --header-text: #495057;
+            --severity-box-text: rgba(255, 255, 255, 0.9);
+            --severity-box-shadow-hover: rgba(0, 0, 0, 0.2);
+            --input-border-color: #ccc;
+            --input-bg-color: #fff;
+            --input-text-color: #333;
+            --button-bg: #007bff;
+            --button-hover-bg: #0056b3;
+            --button-text: white;
+            --table-border: #ddd;
+            --table-header-bg: #d1dff0;
+            --table-header-text: #333;
+            --table-row-hover-bg: #f5f5f5;
+            --link-color: #007bff;
+            --link-visited-color: #551a8b;
+            --pill-text: white;
+        }
+
+        /* Dark theme variables */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #e0e0e0;
+                --container-bg: #2c2c2c;
+                --container-shadow: rgba(255, 255, 255, 0.1);
+                --header-bg: #3a3a3a;
+                --header-text: #c0c0c0;
+                --severity-box-text: rgba(255, 255, 255, 0.9);
+                --severity-box-shadow-hover: rgba(255, 255, 255, 0.2);
+                --input-border-color: #555;
+                --input-bg-color: #3a3a3a;
+                --input-text-color: #e0e0e0;
+                --button-bg: #0d6efd;
+                --button-hover-bg: #0b5ed7;
+                --button-text: white;
+                --table-border: #444;
+                --table-header-bg: #4a4a4a;
+                --table-header-text: #e0e0e0;
+                --table-row-hover-bg: #3f3f3f;
+                --link-color: #58a6ff;
+                --link-visited-color: #9d8eee;
+                --pill-text: white;
+            }
+
+            /* DataTables dark mode adjustments */
+            .dataTables_wrapper .dataTables_length select,
+            .dataTables_wrapper .dt-search input,
+            .dataTables_wrapper .dataTables_info,
+            .dataTables_wrapper .dataTables_paginate .paginate_button {
+                color: var(--text-color) !important;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+                color: #666 !important;
+            }
+
+            .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+                 background-color: var(--table-row-hover-bg);
+                 border-color: var(--table-border);
+                 color: var(--text-color) !important;
+            }
+
+            /* Dark mode table link colors */
+            #vulnerabilityTable a {
+                color: var(--link-color);
+            }
+            #vulnerabilityTable a:visited {
+                 color: var(--link-visited-color);
+             }
+        }
+    </style>
+    <!-- Page & Main Container -->
+    <style>
+        /* Base page styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        /* Main container styling */
+        .main-container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: var(--container-bg);
+            padding: 20px;
+            box-shadow: 0 4px 8px var(--container-shadow);
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        /* Global link styling */
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        a:visited {
+            color: var(--link-visited-color);
+        }
+    </style>
+    <!-- Header Container -->
+    <style>
+        /* Header container styling */
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+        }
+
+        /* Left and right sections of header */
+        .heading-left,
+        .heading-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Right section specific styling */
+        .heading-right {
+            align-items: flex-end;
+            padding-right: 20px;
+            color: var(--header-text);
+        }
+
+        /* Logo image styling */
+        .heading-right img {
+            width: 70px;
+            height: auto;
+        }
+
+        /* Left section text styling */
+        .heading-left h1,
+        .heading-left p {
+            padding-left: 20px;
+            margin: 4px 0;
+        }
+
+        /* Report details grid layout */
+        .heading-left dl.report-details {
+            padding-left: 20px;
+            margin: 4px 0;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2px 10px;
+            align-items: baseline;
+        }
+
+        /* Definition term styling */
+        .heading-left dt {
+            grid-column: 1;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        /* Definition description styling */
+        .heading-left dd {
+            grid-column: 2;
+            margin: 0;
+            text-align: left;
+            word-break: break-all;
+        }
+    </style>
+    <!-- Severity Information Container -->
+    <style>
+        /* Severity info container styling */
+        .severity-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        /* Individual severity box styling */
+        .severity-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Severity title styling */
+        .severity-title {
+            font-size: 0.8em;
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            color: var(--severity-box-text);
+        }
+
+        /* Severity count styling */
+        .severity-count {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        /* Active severity box styling */
+        .severity-box.active {
+            border: 2px solid #007bff;
+        }
+
+        /* Severity color definitions */
+        #critical {
+            background-color: #d9534f;
+        }
+
+        #high {
+            background-color: #f0ad4e;
+        }
+
+        #medium {
+            background-color: #5bc0de;
+        }
+
+        #low {
+            background-color: #5cb85c;
+        }
+
+        #unknown {
+            background-color: #777;
+        }
+
+        /* Severity box hover effects */
+        .severity-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px var(--severity-box-shadow-hover);
+        }
+    </style>
+    <!-- Table Control & Datatables Wrapper -->
+    <style>
+        /* DataTables wrapper styling */
+        .dataTables_wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            margin-bottom: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Button group styling */
+        .dt-buttons {
+            order: 2;
+            flex-grow: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-right: 10px;
+        }
+
+        /* DataTables button styling */
+        .dt-button {
+            background-color: var(--button-bg) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 5px !important;
+            padding: 0 !important;
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            text-align: center;
+            cursor: pointer;
+            margin-left: 5px !important;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s ease;
+            overflow: hidden;
+        }
+
+        /* Button hover state */
+        .dt-button:hover {
+            background-color: var(--button-hover-bg) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Icon-only button styling */
+        .dt-button.buttons-pdf,
+        .dt-button.buttons-excel {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Icon-only button hover state */
+        .dt-button.buttons-pdf:hover,
+        .dt-button.buttons-excel:hover {
+            background-color: rgba(0, 0, 0, 0.1) !important;
+            box-shadow: none !important;
+        }
+
+        /* Icon sizing */
+        .dt-button.buttons-pdf .vscode-icons--file-type-pdf2,
+        .dt-button.buttons-excel .vscode-icons--file-type-excel {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Child row details styling */
+        .child-row-details {
+            padding: 10px;
+            margin-left: 25px;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            border-top: 1px solid var(--table-border);
+            margin-top: -1px;
+            white-space: normal !important;
+        }
+        .child-row-details b {
+            font-weight: bold;
+        }
+        .child-row-details ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        /* === Search Bar === */
+
+        /* Search box container */
+        .dataTables_wrapper .dt-search {
+            position: relative;
+        }
+
+        /* Search input styling */
+        .dataTables_wrapper .dt-search .dt-input {
+            height: 36px;
+            width: 36px;
+            border-style: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            outline: none;
+            border-radius: 18px;
+            transition: all 0.5s ease-in-out;
+            background-color: var(--button-bg);
+            padding-left: 10px;
+            padding-right: 30px;
+            color: var(--button-text);
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        /* Search input placeholder styling */
+        .dataTables_wrapper .dt-search .dt-input::placeholder {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        /* Dark mode placeholder adjustments */
+        @media (prefers-color-scheme: dark) {
+            .dataTables_wrapper .dt-search .dt-input::placeholder {
+                color: var(--text-color);
+                opacity: 0.7;
+            }
+            .dataTables_wrapper .dt-search .dt-input:focus {
+                background-color: var(--input-bg-color);
+                color: var(--input-text-color);
+            }
+        }
+
+        /* Search input focus state */
+        .dataTables_wrapper .dt-search .dt-input:focus {
+            width: 250px;
+            border-radius: 5px;
+            background-color: var(--input-bg-color);
+            border: 1px solid var(--input-border-color);
+            color: var(--input-text-color);
+            cursor: text;
+        }
+
+        /* Search icon container */
+        .dataTables_wrapper .dt-search > label {
+            position: absolute;
+            right: 0.1em;
+            top: 0;
+            height: 36px;
+            width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--button-text);
+            font-size: 14px;
+            cursor: pointer;
+            pointer-events: none;
+            z-index: 2;
+            transition: color 0.3s ease-in-out;
+        }
+
+        /* Search icon styling */
+        .dataTables_wrapper .dt-search > label::before {
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                content: "\f002";
+        }
+
+        /* Search icon focus state */
+        .dataTables_wrapper .dt-search .dt-input:focus + label {
+            color: var(--text-color);
+        }
+
+        /* Hide label text */
+        .dataTables_wrapper .dt-search > label span {
+            display: none;
+        }
+    </style>
+    <!-- Table Container -->
+    <style>
+        /* Table container styling */
+        .data-table {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Table base styling */
+        table.display {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--text-color);
+        }
+
+        /* Table cell styling */
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--table-border);
+        }
+
+        /* Table header styling */
+        th {
+            background-color: var(--table-header-bg);
+            font-weight: bold;
+            color: var(--table-header-text);
+        }
+
+        /* Table row hover state */
+        tr:hover {
+            background-color: var(--table-row-hover-bg);
+        }
+
+        /* Table link styling */
+        table.display a {
+             color: var(--link-color);
+        }
+
+        table.display a:visited {
+             color: var(--link-visited-color);
+        }
+
+        /* Fixed-in column styling */
+        .fixed-in ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .fixed-in li {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <!-- Severity Coloring -->
+    <style>
+        /* Severity pill base styling */
+        .severity-pill,
+        .child-row-details .severity-pill {
+            display: inline-block; 
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: var(--pill-text);
+            text-align: center;
+        }
+
+        /* Severity color definitions */
+        .critical,
+        .child-row-details .critical {
+            background-color: #d9534f;
+        }
+
+        .high,
+        .child-row-details .high {
+            background-color: #f0ad4e;
+        }
+
+        .medium,
+        .child-row-details .medium {
+            background-color: #5bc0de;
+        }
+
+        .low,
+        .child-row-details .low {
+            background-color: #5cb85c;
+        }
+
+        .unknown,
+        .child-row-details .unknown {
+            background-color: #777;
+        }
+    </style>
+    <!-- State Coloring -->
+    <style>
+        /* State pill base styling */
+        .state-pill,
+        .child-row-details .state-pill {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: var(--pill-text);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* State color definitions */
+        .fixed,
+        .child-row-details .fixed {
+            background-color: #d9534f;
+        }
+
+        .not-fixed,
+        .child-row-details .not-fixed {
+            background-color: #f0ad4e;
+        }
+
+        .unknown,
+        .child-row-details .unknown {
+            background-color: #6c757d;
+        }
+
+        .wont-fix,
+        .child-row-details .wont-fix {
+            background-color: #5cb85c;
+        }
+    </style>
+
+    <!-- Package Type Icon Styling -->
+    <style>
+        /* Package type cell container */
+        .pkg-type-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Icon base styling */
+        .pkg-type-cell i,
+        .pkg-type-cell .icon-span {
+            font-size: 1.2em;
+            width: 1.2em;
+            text-align: center;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        /* Package icon fallback */
+        .iconify-noto--package {
+            display: inline-block;
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: middle;
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            background-image: url('https://api.iconify.design/noto:package.svg');
+        }
+
+        /* Alpine Linux icon */
+        .iconify-file-icons--alpine-linux {
+            display: inline-block;
+            width: 1.2em;
+            height: 1.2em;
+            background-color: #0d597f;
+            mask-image: url('https://api.iconify.design/file-icons:alpine-linux.svg');
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+        }
+
+        /* Excel icon */
+        .vscode-icons--file-type-excel {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            background-image: url('https://api.iconify.design/vscode-icons:file-type-excel.svg');
+        }
+
+        /* PDF icon */
+        .vscode-icons--file-type-pdf2 {
+            display: inline-block;
+            width: 1em;
+            height: 1em;
+            vertical-align: middle;
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            background-image: url('https://api.iconify.design/vscode-icons:file-type-pdf2.svg');
+        }
+    </style>
+
+</head>
+
+
+
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+<body>
+    <div class="main-container">
+        <div class="heading">
+            <div class="heading-left">
+                <h1 class="report-title">Vulnerability Report</h1>
+                <dl class="report-details">
+                    <dt>Name:</dt>
+                    <dd id="nameValue">unknown</dd>
+
+                    <dt>Type:</dt>
+                    <dd id="typeValue">sbom-file</dd><dt>Date:</dt>
+                    <dd>
+                        <span id="dateElement">2025-06-04T19:29:48.357979+01:00</span>
+                        <span id="prettyDateElement" style="display: none;"></span>
+                    </dd>
+                </dl>
+            </div>
+            <div class="heading-right">
+                <img src="https://user-images.githubusercontent.com/5199289/136855393-d0a9eef9-ccf1-4e2b-9d7c-7aad16a567e5.png"
+                    alt="Grype Logo">
+            </div>
+        </div>
+        <div class="severity-info">
+            <div class="severity-box" id="critical">
+                <div class="severity-title">Critical</div>
+                <div class="severity-count" id="criticalCount">9</div>
+            </div>
+            <div class="severity-box" id="high">
+                <div class="severity-title">High</div>
+                <div class="severity-count" id="highCount">11</div>
+            </div>
+            <div class="severity-box" id="medium">
+                <div class="severity-title">Medium</div>
+                <div class="severity-count" id="mediumCount">14</div>
+            </div>
+            <div class="severity-box" id="low">
+                <div class="severity-title">Low</div>
+                <div class="severity-count" id="lowCount">2</div>
+            </div>
+            <div class="severity-box" id="unknown">
+                <div class="severity-title">Unknown</div>
+                <div class="severity-count" id="unknownCount">0</div>
+            </div>
+        </div>
+        <div class="data-table">
+            <table id="vulnerabilityTable" class="display nowrap" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Version</th>
+                        <th>Type</th>
+                        <th>Vulnerability</th>
+                        <th>Severity</th>
+                        <th>State</th>
+                        <th>Fixed In</th>
+                        <th>Description</th>
+                        <th>Related URLs</th>
+                        <th>PURL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-4577">CVE-2024-4577</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.29</li>
+                                <li>8.2.20</li>
+                                <li>8.3.8</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.29, 8.2.* before 8.2.20, 8.3.* before 8.3.8, when using Apache and PHP-CGI on Windows, if the system is set up to use certain code pages, Windows may use &#34;Best-Fit&#34; behavior to replace characters in command line given to Win32 API functions. PHP CGI module may misinterpret those characters as PHP options, which may allow a malicious user to pass options to PHP binary being run, and thus reveal the source code of scripts, run arbitrary PHP code on the server, etc.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2024/06/07/1","https://arstechnica.com/security/2024/06/php-vulnerability-allows-attackers-to-run-malicious-code-on-windows-servers/","https://blog.orange.tw/2024/06/cve-2024-4577-yet-another-php-rce.html","https://cert.be/en/advisory/warning-php-remote-code-execution-patch-immediately","https://devco.re/blog/2024/06/06/security-alert-cve-2024-4577-php-cgi-argument-injection-vulnerability-en/","https://github.com/11whoami99/CVE-2024-4577","https://github.com/php/php-src/security/advisories/GHSA-3qgc-jrrr-25jv","https://github.com/rapid7/metasploit-framework/pull/19247","https://github.com/watchtowrlabs/CVE-2024-4577","https://github.com/xcanwin/CVE-2024-4577-PHP-RCE","https://isc.sans.edu/diary/30994","https://labs.watchtowr.com/no-way-php-strikes-again-cve-2024-4577/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240621-0008/","https://www.imperva.com/blog/imperva-protects-against-critical-php-vulnerability-cve-2024-4577/","https://www.php.net/ChangeLog-8.php#8.1.29","https://www.php.net/ChangeLog-8.php#8.2.20","https://www.php.net/ChangeLog-8.php#8.3.8","http://www.openwall.com/lists/oss-security/2024/06/07/1","https://arstechnica.com/security/2024/06/php-vulnerability-allows-attackers-to-run-malicious-code-on-windows-servers/","https://blog.orange.tw/2024/06/cve-2024-4577-yet-another-php-rce.html","https://blog.talosintelligence.com/new-persistent-attacks-japan/","https://cert.be/en/advisory/warning-php-remote-code-execution-patch-immediately","https://devco.re/blog/2024/06/06/security-alert-cve-2024-4577-php-cgi-argument-injection-vulnerability-en/","https://github.com/11whoami99/CVE-2024-4577","https://github.com/php/php-src/security/advisories/GHSA-3qgc-jrrr-25jv","https://github.com/rapid7/metasploit-framework/pull/19247","https://github.com/watchtowrlabs/CVE-2024-4577","https://github.com/xcanwin/CVE-2024-4577-PHP-RCE","https://isc.sans.edu/diary/30994","https://labs.watchtowr.com/no-way-php-strikes-again-cve-2024-4577/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240621-0008/","https://www.imperva.com/blog/imperva-protects-against-critical-php-vulnerability-cve-2024-4577/","https://www.php.net/ChangeLog-8.php#8.1.29","https://www.php.net/ChangeLog-8.php#8.2.20","https://www.php.net/ChangeLog-8.php#8.3.8","https://www.vicarius.io/vsociety/posts/php-cgi-argument-injection-to-rce-cve-2024-4577","https://www.vicarius.io/vsociety/posts/php-cgi-os-command-injection-vulnerability-cve-2024-4577"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-1874">CVE-2024-1874</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.28</li>
+                                <li>8.2.18</li>
+                                <li>8.3.5</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.28, 8.2.* before 8.2.18, 8.3.* before 8.3.5, when using proc_open() command with array syntax, due to insufficient escaping, if the arguments of the executed command are controlled by a malicious user, the user can supply arguments that would execute arbitrary commands in Windows shell.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2024/04/12/11","http://www.openwall.com/lists/oss-security/2024/06/07/1","https://github.com/php/php-src/security/advisories/GHSA-pc52-254m-w9w7","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240510-0009/","http://www.openwall.com/lists/oss-security/2024/04/12/11","http://www.openwall.com/lists/oss-security/2024/06/07/1","https://github.com/php/php-src/security/advisories/GHSA-pc52-254m-w9w7","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240510-0009/","https://www.vicarius.io/vsociety/posts/command-injection-vulnerability-in-php-on-windows-systems-cve-2024-1874-and-cve-2024-5585"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-31626">CVE-2022-31626</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>7.4.30</li>
+                                <li>8.0.20</li>
+                                <li>8.1.7</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 7.4.x below 7.4.30, 8.0.x below 8.0.20, and 8.1.x below 8.1.7, when pdo_mysql extension with mysqlnd driver, if the third party is allowed to supply host to connect to and the password for the connection, password of excessive length can trigger a buffer overflow in PHP, which can lead to a remote code execution vulnerability.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81719","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3T4MMEEZYYAEHPQMZDFN44PHORJWJFZQ/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZZTZQKRGEYJT5UB4FGG3MOE72SQUHSL4/","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220722-0005/","https://www.debian.org/security/2022/dsa-5179","https://bugs.php.net/bug.php?id=81719","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3T4MMEEZYYAEHPQMZDFN44PHORJWJFZQ/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZZTZQKRGEYJT5UB4FGG3MOE72SQUHSL4/","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220722-0005/","https://www.debian.org/security/2022/dsa-5179"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-3824">CVE-2023-3824</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.0.30</li>
+                                <li>8.1.22</li>
+                                <li>8.2.9</li>
+                            </ul>
+                        </td>
+                        <td>In PHP version 8.0.* before 8.0.30,  8.1.* before 8.1.22, and 8.2.* before 8.2.8, when loading phar file, while reading PHAR directory entries, insufficient length checking may lead to a stack buffer overflow, leading potentially to memory corruption or RCE.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-jqcx-ccgc-xwhv","https://lists.debian.org/debian-lts-announce/2023/09/msg00002.html","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/7NBF77WN6DTVTY2RE73IGPYD6M4PIAWA/","https://security.netapp.com/advisory/ntap-20230825-0001/","https://github.com/php/php-src/security/advisories/GHSA-jqcx-ccgc-xwhv","https://lists.debian.org/debian-lts-announce/2023/09/msg00002.html","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/7NBF77WN6DTVTY2RE73IGPYD6M4PIAWA/","https://security.netapp.com/advisory/ntap-20230825-0001/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-31629">CVE-2022-31629</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>7.4.31</li>
+                                <li>8.0.24</li>
+                                <li>8.1.11</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions before 7.4.31, 8.0.24 and 8.1.11, the vulnerability enables network and same-site attackers to set a standard insecure cookie in the victim&#39;s browser which is treated as a `__Host-` or `__Secure-` cookie by PHP applications.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2024/04/12/11","https://bugs.php.net/bug.php?id=81727","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/2L5SUVYGAKSWODUQPZFBUB3AL6E6CSEV/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/KJZK3X6B7FBE32FETDSMRLJXTFTHKWSY/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/LSJVPJTX7T3J5V7XHR4MFNHZGP44R5XE/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/VI3E6A3ZTH2RP7OMLJHSVFIEQBIFM6RF/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/XNIEABBH5XCXLFWWZYIDE457SPEDZTXV/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZGWIK3HMBACERGB4TSBB2JUOMPYY2VKY/","https://security.gentoo.org/glsa/202211-03","https://security.netapp.com/advisory/ntap-20221209-0001/","https://www.debian.org/security/2022/dsa-5277","http://www.openwall.com/lists/oss-security/2024/04/12/11","https://bugs.php.net/bug.php?id=81727","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/2L5SUVYGAKSWODUQPZFBUB3AL6E6CSEV/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/KJZK3X6B7FBE32FETDSMRLJXTFTHKWSY/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/LSJVPJTX7T3J5V7XHR4MFNHZGP44R5XE/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/VI3E6A3ZTH2RP7OMLJHSVFIEQBIFM6RF/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/XNIEABBH5XCXLFWWZYIDE457SPEDZTXV/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZGWIK3HMBACERGB4TSBB2JUOMPYY2VKY/","https://security.gentoo.org/glsa/202211-03","https://security.netapp.com/advisory/ntap-20221209-0001/","https://www.debian.org/security/2022/dsa-5277"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-2756">CVE-2024-2756</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.28</li>
+                                <li>8.2.18</li>
+                                <li>8.3.5</li>
+                            </ul>
+                        </td>
+                        <td>Due to an incomplete fix to  CVE-2022-31629 https://github.com/advisories/GHSA-c43m-486j-j32p , network and same-site attackers can set a standard insecure cookie in the victim&#39;s browser which is treated as a __Host- or __Secure- cookie by PHP applications.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2024/04/12/11","https://github.com/php/php-src/security/advisories/GHSA-wpj3-hf5j-x4v4","https://lists.debian.org/debian-lts-announce/2024/05/msg00005.html","https://security.netapp.com/advisory/ntap-20240510-0008/","http://www.openwall.com/lists/oss-security/2024/04/12/11","https://github.com/php/php-src/security/advisories/GHSA-wpj3-hf5j-x4v4","https://lists.debian.org/debian-lts-announce/2024/05/msg00005.html","https://security.netapp.com/advisory/ntap-20240510-0008/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-37454">CVE-2022-37454</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>7.4.33</li>
+                                <li>8.0.25</li>
+                                <li>8.1.12</li>
+                            </ul>
+                        </td>
+                        <td>The Keccak XKCP SHA-3 reference implementation before fdc6fef has an integer overflow and resultant buffer overflow that allows attackers to execute arbitrary code or eliminate expected cryptographic properties. This occurs in the sponge function interface.</td>
+                        <td>["https://csrc.nist.gov/projects/hash-functions/sha-3-project","https://eprint.iacr.org/2023/331","https://github.com/XKCP/XKCP/security/advisories/GHSA-6w4m-2xhg-2658","https://lists.debian.org/debian-lts-announce/2022/10/msg00041.html","https://lists.debian.org/debian-lts-announce/2022/11/msg00000.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3ALQ6BDDPX5HU5YBQOBMDVAA2TSGDKIJ/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/CMIEXLMTW5GO36HTFFWIPB3OHZXCT3G4/","https://mouha.be/sha-3-buffer-overflow/","https://news.ycombinator.com/item?id=33281106","https://news.ycombinator.com/item?id=35050307","https://security.gentoo.org/glsa/202305-02","https://www.debian.org/security/2022/dsa-5267","https://www.debian.org/security/2022/dsa-5269","https://csrc.nist.gov/projects/hash-functions/sha-3-project","https://eprint.iacr.org/2023/331","https://github.com/XKCP/XKCP/security/advisories/GHSA-6w4m-2xhg-2658","https://lists.debian.org/debian-lts-announce/2022/10/msg00041.html","https://lists.debian.org/debian-lts-announce/2022/11/msg00000.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3ALQ6BDDPX5HU5YBQOBMDVAA2TSGDKIJ/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/CMIEXLMTW5GO36HTFFWIPB3OHZXCT3G4/","https://mouha.be/sha-3-buffer-overflow/","https://news.ycombinator.com/item?id=33281106","https://news.ycombinator.com/item?id=35050307","https://security.gentoo.org/glsa/202305-02","https://security.netapp.com/advisory/ntap-20230203-0001/","https://www.debian.org/security/2022/dsa-5267","https://www.debian.org/security/2022/dsa-5269"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-31625">CVE-2022-31625</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>7.4.30</li>
+                                <li>8.0.20</li>
+                                <li>8.1.7</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 7.4.x below 7.4.30, 8.0.x below 8.0.20, and 8.1.x below 8.1.7, when using Postgres database extension, supplying invalid parameters to the parametrized query may lead to PHP attempting to free memory using uninitialized data as pointers. This could lead to RCE vulnerability or denial of service.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81720","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3T4MMEEZYYAEHPQMZDFN44PHORJWJFZQ/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZZTZQKRGEYJT5UB4FGG3MOE72SQUHSL4/","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220722-0005/","https://www.debian.org/security/2022/dsa-5179","https://bugs.php.net/bug.php?id=81720","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/3T4MMEEZYYAEHPQMZDFN44PHORJWJFZQ/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/ZZTZQKRGEYJT5UB4FGG3MOE72SQUHSL4/","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220722-0005/","https://www.debian.org/security/2022/dsa-5179"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-5585">CVE-2024-5585</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.29</li>
+                                <li>8.2.20</li>
+                                <li>8.3.8</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.29, 8.2.* before 8.2.20, 8.3.* before 8.3.8, the fix for CVE-2024-1874 does not work if the command name includes trailing spaces. Original issue: when using proc_open() command with array syntax, due to insufficient escaping, if the arguments of the executed command are controlled by a malicious user, the user can supply arguments that would execute arbitrary commands in Windows shell.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2024/06/07/1","https://github.com/php/php-src/security/advisories/GHSA-9fcc-425m-g385","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240726-0002/","http://www.openwall.com/lists/oss-security/2024/06/07/1","https://github.com/php/php-src/security/advisories/GHSA-9fcc-425m-g385","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240726-0002/","https://www.vicarius.io/vsociety/posts/command-injection-vulnerability-in-php-on-windows-systems-cve-2024-1874-and-cve-2024-5585"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-8926">CVE-2024-8926</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.30</li>
+                                <li>8.2.24</li>
+                                <li>8.3.12</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.30, 8.2.* before 8.2.24, 8.3.* before 8.3.12, when using a certain non-standard configurations of Windows codepages, the fixes for  CVE-2024-4577 https://github.com/advisories/GHSA-vxpp-6299-mxw3  may still be bypassed and the same command injection related to Windows &#34;Best Fit&#34; codepage behavior can be achieved. This may allow a malicious user to pass options to PHP binary being run, and thus reveal the source code of scripts, run arbitrary PHP code on the server, etc.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-p99j-rfp4-xqvq"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2021-21708">CVE-2021-21708</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>7.4.28</li>
+                                <li>8.0.16</li>
+                                <li>8.1.3</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 7.4.x below 7.4.28, 8.0.x below 8.0.16, and 8.1.x below 8.1.3, when using filter functions with FILTER_VALIDATE_FLOAT filter and min/max limits, if the filter fails, there is a possibility to trigger use of allocated memory after free, which can result it crashes, and potentially in overwrite of other memory chunks and RCE. This issue affects: code that uses FILTER_VALIDATE_FLOAT with min/max limits.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81708","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220325-0004/","https://bugs.php.net/bug.php?id=81708","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220325-0004/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-11236">CVE-2024-11236</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.31</li>
+                                <li>8.2.26</li>
+                                <li>8.3.14</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.31, 8.2.* before 8.2.26, 8.3.* before 8.3.14, uncontrolled long string inputs to ldap_escape() function on 32-bit systems can cause an integer overflow, resulting in an out-of-bounds write.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-5hqh-c84r-qjcv"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-5458">CVE-2024-5458</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.29</li>
+                                <li>8.2.20</li>
+                                <li>8.3.8</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.29, 8.2.* before 8.2.20, 8.3.* before 8.3.8, due to a code logic error, filtering functions such as filter_var when validating URLs (FILTER_VALIDATE_URL) for certain types of URLs the function will result in invalid user information (username + password part of URLs) being treated as valid user information. This may lead to the downstream code accepting invalid URLs as valid and parsing them incorrectly.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2024/06/07/1","https://github.com/php/php-src/security/advisories/GHSA-w8qr-v226-r27w","https://lists.debian.org/debian-lts-announce/2024/06/msg00009.html","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240726-0001/","http://www.openwall.com/lists/oss-security/2024/06/07/1","https://github.com/php/php-src/security/advisories/GHSA-w8qr-v226-r27w","https://lists.debian.org/debian-lts-announce/2024/06/msg00009.html","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20240726-0001/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-11233">CVE-2024-11233</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.31</li>
+                                <li>8.2.26</li>
+                                <li>8.3.14</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.31, 8.2.* before 8.2.26, 8.3.* before 8.3.14, due to an error in convert.quoted-printable-decode filter certain data can lead to buffer overread by one byte, which can in certain circumstances lead to crashes or disclose content of other memory areas.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-r977-prxv-hc43"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-8932">CVE-2024-8932</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.31</li>
+                                <li>8.2.26</li>
+                                <li>8.3.14</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.31, 8.2.* before 8.2.26, 8.3.* before 8.3.14, uncontrolled long string inputs to ldap_escape() function on 32-bit systems can cause an integer overflow, resulting in an out-of-bounds write.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-g665-fm4p-vhff","https://security.netapp.com/advisory/ntap-20250110-0009/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-31627">CVE-2022-31627</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.8</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.x below 8.1.8, when fileinfo functions, such as finfo_buffer, due to incorrect patch applied to the third party code from libmagic, incorrect function may be used to free allocated memory, which may lead to heap corruption.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81723","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220826-0008/","https://bugs.php.net/bug.php?id=81723","https://security.gentoo.org/glsa/202209-20","https://security.netapp.com/advisory/ntap-20220826-0008/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-3823">CVE-2023-3823</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.0.30</li>
+                                <li>8.1.22</li>
+                                <li>8.2.9</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.0.* before 8.0.30, 8.1.* before 8.1.22, and 8.2.* before 8.2.8 various XML functions rely on libxml global state to track configuration variables, like whether external entities are loaded. This state is assumed to be unchanged unless the user explicitly changes it by calling appropriate function. However, since the state is process-global, other modules - such as ImageMagick - may also use this library within the same process, and change that global state for their internal purposes, and leave it in a state where external entities loading is enabled. This can lead to the situation where external XML is parsed with external entities loaded, which can lead to disclosure of any local files accessible to PHP. This vulnerable state may persist in the same process across many requests, until the process is shut down.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-3qrf-m4j2-pcrr","https://lists.debian.org/debian-lts-announce/2023/09/msg00002.html","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/7NBF77WN6DTVTY2RE73IGPYD6M4PIAWA/","https://security.netapp.com/advisory/ntap-20230825-0001/","https://github.com/php/php-src/security/advisories/GHSA-3qrf-m4j2-pcrr","https://lists.debian.org/debian-lts-announce/2023/09/msg00002.html","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/7NBF77WN6DTVTY2RE73IGPYD6M4PIAWA/","https://security.netapp.com/advisory/ntap-20230825-0001/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-3247">CVE-2023-3247</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.0.29</li>
+                                <li>8.1.20</li>
+                                <li>8.2.7</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.0.* before 8.0.29, 8.1.* before 8.1.20, 8.2.* before 8.2.7 when using SOAP HTTP Digest Authentication, random value generator was not checked for failure, and was using narrower range of values than it should have. In case of random generator failure, it could lead to a disclosure of 31 bits of uninitialized memory from the client to the server, and it also made easier to a malicious server to guess the client&#39;s nonce.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-76gg-c692-v2mw","https://github.com/php/php-src/security/advisories/GHSA-76gg-c692-v2mw"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-0568">CVE-2023-0568</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.0.28</li>
+                                <li>8.1.16</li>
+                                <li>8.2.3</li>
+                            </ul>
+                        </td>
+                        <td>In PHP 8.0.X before 8.0.28, 8.1.X before 8.1.16 and 8.2.X before 8.2.3, core path resolution function allocate buffer one byte too small. When resolving paths with lengths close to system MAXPATHLEN setting, this may lead to the byte after the allocated buffer being overwritten with NUL value, which might lead to unauthorized data access or modification.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81746","https://security.netapp.com/advisory/ntap-20230517-0001/","https://bugs.php.net/bug.php?id=81746","https://security.netapp.com/advisory/ntap-20230517-0001/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-11234">CVE-2024-11234</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.31</li>
+                                <li>8.2.26</li>
+                                <li>8.3.14</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.31, 8.2.* before 8.2.26, 8.3.* before 8.3.14, when using streams with configured proxy and &#34;request_fulluri&#34; option, the URI is not properly sanitized which can lead to HTTP request smuggling and allow the attacker to use the proxy to perform arbitrary HTTP requests originating from the server, thus potentially gaining access to resources not normally available to the external user.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-c5f2-jwm7-mmq2"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-1734">CVE-2025-1734</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.32</li>
+                                <li>8.2.28</li>
+                                <li>8.3.19</li>
+                                <li>8.4.5</li>
+                            </ul>
+                        </td>
+                        <td>In PHP from 8.1.* before 8.1.32, from 8.2.* before 8.2.28, from 8.3.* before 8.3.19, from 8.4.* before 8.4.5, when receiving headers from HTTP server, the headers missing a colon (:) are treated as valid headers even though they are not. This may confuse applications into accepting invalid headers.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-pcmh-g36c-qc44","https://security.netapp.com/advisory/ntap-20250523-0009/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-1736">CVE-2025-1736</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.32</li>
+                                <li>8.2.28</li>
+                                <li>8.3.19</li>
+                                <li>8.4.5</li>
+                            </ul>
+                        </td>
+                        <td>In PHP from 8.1.* before 8.1.32, from 8.2.* before 8.2.28, from 8.3.* before 8.3.19, from 8.4.* before 8.4.5, when user-supplied headers are sent, the insufficient validation of the end-of-line characters may prevent certain headers from being sent or lead to certain headers be misinterpreted.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-hgf5-96fm-v528","https://security.netapp.com/advisory/ntap-20250523-0006/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-0662">CVE-2023-0662</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.0.28</li>
+                                <li>8.1.16</li>
+                                <li>8.2.3</li>
+                            </ul>
+                        </td>
+                        <td>In PHP 8.0.X before 8.0.28, 8.1.X before 8.1.16 and 8.2.X before 8.2.3, excessive number of parts in HTTP form upload can cause high resource consumption and excessive number of log entries. This can cause denial of service on the affected server by exhausting CPU resources or disk space.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-54hq-v5wp-fqgv","https://security.netapp.com/advisory/ntap-20230517-0001/","https://github.com/php/php-src/security/advisories/GHSA-54hq-v5wp-fqgv","https://security.netapp.com/advisory/ntap-20230517-0001/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-1861">CVE-2025-1861</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.32</li>
+                                <li>8.2.28</li>
+                                <li>8.3.19</li>
+                                <li>8.4.5</li>
+                            </ul>
+                        </td>
+                        <td>In PHP from 8.1.* before 8.1.32, from 8.2.* before 8.2.28, from 8.3.* before 8.3.19, from 8.4.* before 8.4.5, when parsing HTTP redirect in the response to an HTTP request, there is currently limit on the location value size caused by limited size of the location buffer to 1024. However as per RFC9110, the limit is recommended to be 8000. This may lead to incorrect URL truncation and redirecting to a wrong location.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-52jp-hrpf-2jff","https://security.netapp.com/advisory/ntap-20250523-0005/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-2408">CVE-2024-2408</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.29</li>
+                                <li>8.2.20</li>
+                                <li>8.3.8</li>
+                            </ul>
+                        </td>
+                        <td>The openssl_private_decrypt function in PHP, when using PKCS1 padding (OPENSSL_PKCS1_PADDING, which is the default), is vulnerable to the Marvin Attack unless it is used with an OpenSSL version that includes the changes from this pull request:  https://github.com/openssl/openssl/pull/13817  (rsa_pkcs1_implicit_rejection). These changes are part of OpenSSL 3.2 and have also been backported to stable versions of various Linux distributions, as well as to the PHP builds provided for Windows since the previous release. All distributors and builders should ensure that this version is used to prevent PHP from being vulnerable.
+
+PHP Windows builds for the versions 8.1.29, 8.2.20 and 8.3.8 and above include OpenSSL patches that fix the vulnerability.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-hh26-4ppw-5864","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://github.com/php/php-src/security/advisories/GHSA-hh26-4ppw-5864","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/PKGTQUOA2NTZ3RXN22CSAUJPIRUYRB4B/","https://lists.fedoraproject.org/archives/list/package-announce@lists.fedoraproject.org/message/W45DBOH56NQDRTOM2DN2LNA2FZIMC3PK/","https://security.netapp.com/advisory/ntap-20250321-0008/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-1217">CVE-2025-1217</a>
+                        </td>
+                        <td>Low</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.32</li>
+                                <li>8.2.28</li>
+                                <li>8.3.19</li>
+                                <li>8.4.5</li>
+                            </ul>
+                        </td>
+                        <td>In PHP from 8.1.* before 8.1.32, from 8.2.* before 8.2.28, from 8.3.* before 8.3.19, from 8.4.* before 8.4.5, when http request module parses HTTP response obtained from a server, folded headers are parsed incorrectly, which may lead to misinterpreting the response and using incorrect headers, MIME types, etc.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-v8xr-gpvj-cx9g","https://security.netapp.com/advisory/ntap-20250523-0008/","https://github.com/php/php-src/security/advisories/GHSA-v8xr-gpvj-cx9g"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-8927">CVE-2024-8927</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.30</li>
+                                <li>8.2.24</li>
+                                <li>8.3.12</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.30, 8.2.* before 8.2.24, 8.3.* before 8.3.12, HTTP_REDIRECT_STATUS variable is used to check whether or not CGI binary is being run by the HTTP server. However, in certain scenarios, the content of this variable can be controlled by the request submitter via HTTP headers, which can lead to cgi.force_redirect option not being correctly applied. In certain configurations this may lead to arbitrary file inclusion in PHP.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-94p6-54jq-9mwp"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-3096">CVE-2024-3096</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.28</li>
+                                <li>8.2.18</li>
+                                <li>8.3.5</li>
+                            </ul>
+                        </td>
+                        <td>In PHP  version 8.1.* before 8.1.28, 8.2.* before 8.2.18, 8.3.* before 8.3.5, if a password stored with password_hash() starts with a null byte (\x00), testing a blank string as the password via password_verify() will incorrectly return true.</td>
+                        <td>["http://www.openwall.com/lists/oss-security/2024/04/12/11","https://github.com/php/php-src/security/advisories/GHSA-h746-cjrr-wfmr","https://lists.debian.org/debian-lts-announce/2024/05/msg00005.html","https://security.netapp.com/advisory/ntap-20240510-0010/","http://www.openwall.com/lists/oss-security/2024/04/12/11","https://github.com/php/php-src/security/advisories/GHSA-h746-cjrr-wfmr","https://lists.debian.org/debian-lts-announce/2024/05/msg00005.html","https://security.netapp.com/advisory/ntap-20240510-0010/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-31631">CVE-2022-31631</a>
+                        </td>
+                        <td>Critical</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.0.27</li>
+                                <li>8.1.15</li>
+                                <li>8.2.2</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.0.* before 8.0.27, 8.1.* before 8.1.15, 8.2.* before 8.2.2 when using PDO::quote() function to quote user-supplied data for SQLite, supplying an overly long string may cause the driver to incorrectly quote the data, which may further lead to SQL injection vulnerabilities.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81740","https://security.netapp.com/advisory/ntap-20230223-0007/","https://bugs.php.net/bug.php?id=81740"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-31630">CVE-2022-31630</a>
+                        </td>
+                        <td>High</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>7.4.33</li>
+                                <li>8.0.25</li>
+                                <li>8.1.12</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions prior to 7.4.33, 8.0.25 and 8.1.12, when using imageloadfont() function in gd extension, it is possible to supply a specially crafted font file, such as if the loaded font is used with imagechar() function, the read outside allocated buffer will be used. This can lead to crashes or disclosure of confidential information.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81739","https://bugs.php.net/bug.php?id=81739"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-0567">CVE-2023-0567</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.0.28</li>
+                                <li>8.1.16</li>
+                                <li>8.2.3</li>
+                            </ul>
+                        </td>
+                        <td>In PHP 8.0.X before 8.0.28, 8.1.X before 8.1.16 and 8.2.X before 8.2.3, password_verify() function may accept some invalid Blowfish hashes as valid. If such invalid hash ever ends up in the password database, it may lead to an application allowing any password for this entry as valid.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81744","https://github.com/php/php-src/security/advisories/GHSA-7fj2-8x79-rjf4","https://bugs.php.net/bug.php?id=81744","https://github.com/php/php-src/security/advisories/GHSA-7fj2-8x79-rjf4","https://security.netapp.com/advisory/ntap-20230331-0008/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-8925">CVE-2024-8925</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.30</li>
+                                <li>8.2.24</li>
+                                <li>8.3.12</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.30, 8.2.* before 8.2.24, 8.3.* before 8.3.12, erroneous parsing of multipart form data contained in an HTTP POST request could lead to legitimate data not being processed. This could lead to malicious attacker able to control part of the submitted data being able to exclude portion of other data, potentially leading to erroneous application behavior.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-9pqp-7h25-4f32"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-8929">CVE-2024-8929</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.31</li>
+                                <li>8.2.24</li>
+                                <li>8.3.14</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.31, 8.2.* before 8.2.26, 8.3.* before 8.3.14, a hostile MySQL server can cause the client to disclose the content of its heap containing data from other SQL requests and possible other data belonging to different users of the same server.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-h35g-vwh6-m678","https://security.netapp.com/advisory/ntap-20250110-0008/"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2025-1219">CVE-2025-1219</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.32</li>
+                                <li>8.2.28</li>
+                                <li>8.3.19</li>
+                                <li>8.4.5</li>
+                            </ul>
+                        </td>
+                        <td>In PHP from 8.1.* before 8.1.32, from 8.2.* before 8.2.28, from 8.3.* before 8.3.19, from 8.4.* before 8.4.5, when requesting a HTTP resource using the DOM or SimpleXML extensions, the wrong content-type header is used to determine the charset when the requested resource performs a redirect. This may cause the resulting document to be parsed incorrectly or bypass validations.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-p3x9-6h7p-cgfc","https://security.netapp.com/advisory/ntap-20250523-0007/","https://github.com/php/php-src/security/advisories/GHSA-p3x9-6h7p-cgfc"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2024-9026">CVE-2024-9026</a>
+                        </td>
+                        <td>Low</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>8.1.30</li>
+                                <li>8.2.24</li>
+                                <li>8.3.12</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions 8.1.* before 8.1.30, 8.2.* before 8.2.24, 8.3.* before 8.3.12, when using PHP-FPM SAPI and it is configured to catch workers output through catch_workers_output = yes, it may be possible to pollute the final log or remove up to 4 characters from the log messages by manipulating log message content. Additionally, if PHP-FPM is configured to use syslog output, it may be possible to further remove log data using the same vulnerability.</td>
+                        <td>["https://github.com/php/php-src/security/advisories/GHSA-865w-9rf3-2wh5"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                    <tr>
+                        <td>php-fpm</td>
+                        <td>8.1.2</td>
+                        <td>binary</td>
+                        <td>
+                            <a href="https://nvd.nist.gov/vuln/detail/CVE-2022-31628">CVE-2022-31628</a>
+                        </td>
+                        <td>Medium</td>
+                        <td>fixed</td>
+                        <td>
+                            <ul>
+                                <li>7.4.31</li>
+                                <li>8.0.24</li>
+                                <li>8.1.11</li>
+                            </ul>
+                        </td>
+                        <td>In PHP versions before 7.4.31, 8.0.24 and 8.1.11, the phar uncompressor code would recursively uncompress &#34;quines&#34; gzip files, resulting in an infinite loop.</td>
+                        <td>["https://bugs.php.net/bug.php?id=81726","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/2L5SUVYGAKSWODUQPZFBUB3AL6E6CSEV/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/VI3E6A3ZTH2RP7OMLJHSVFIEQBIFM6RF/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/XNIEABBH5XCXLFWWZYIDE457SPEDZTXV/","https://security.gentoo.org/glsa/202211-03","https://security.netapp.com/advisory/ntap-20221209-0001/","https://www.debian.org/security/2022/dsa-5277","https://bugs.php.net/bug.php?id=81726","https://lists.debian.org/debian-lts-announce/2022/12/msg00030.html","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/2L5SUVYGAKSWODUQPZFBUB3AL6E6CSEV/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/VI3E6A3ZTH2RP7OMLJHSVFIEQBIFM6RF/","https://lists.fedoraproject.org/archives/list/package-announce%40lists.fedoraproject.org/message/XNIEABBH5XCXLFWWZYIDE457SPEDZTXV/","https://security.gentoo.org/glsa/202211-03","https://security.netapp.com/advisory/ntap-20221209-0001/","https://www.debian.org/security/2022/dsa-5277"]</td>
+                        <td>pkg:generic/php-fpm@8.1.2</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+
+    // ================================================
+    // DataTables Core Logic & Callbacks
+    // ================================================
+
+    /**
+     * Initializes the main DataTable instance (#vulnerabilityTable) with configuration
+     * for responsiveness, buttons (PDF, Excel), dynamic page length calculation,
+     * column definitions, severity filtering, and other display settings.
+     */
+    function initDataTable() {
+        // Target the table element
+        const tableElement = $('#vulnerabilityTable');
+        
+        // Destroy existing DataTable instance if it exists, to prevent reinitialization errors
+        if ($.fn.dataTable.isDataTable(tableElement)) {
+            tableElement.DataTable().destroy();
+        }
+
+        const table = tableElement.DataTable({
+            // Responsive Extension Configuration
+            responsive: {
+                details: {
+                    type: 'inline',
+                    // Use the custom renderer function for child row content
+                    renderer: renderChildRowDetailsDt
+                }
+            },
+            // DOM Structure Definition (Controls placement)
+            // B: Buttons, f: Filter input, t: Table, i: Info, p: Pagination
+            // Custom wrappers for styling/control: dataTables_wrapper, dataTables_control
+            dom: '<"dataTables_wrapper"Bf>t<"dataTables_control"ip>',
+
+            // Language Configuration
+            language: {
+                search: "", // Hide the default "Search:" label
+                searchPlaceholder: "Search vulnerabilities..." // Set custom placeholder
+            },
+
+            // Initial Sorting Order (Sort by Name column, ascending)
+            order: [[0, 'asc']],
+
+            // Column Definitions (retrieved from helper function)
+            columnDefs: getColumnDefsDt(),
+
+            // Callback after table initialization is complete
+            initComplete: function(settings, json) {
+                // Calculate and set initial page length based on viewport height
+                setDynamicPageLengthDt(this.api());
+            },
+
+            // Callback after each table draw (including pagination, filtering, sorting)
+            drawCallback: function (settings) {
+                const api = this.api();
+                const pageInfo = api.page.info();
+
+                // Target the specific wrapper for pagination controls
+                const controlsWrapper = $(api.table().container()).find('.dataTables_control');
+
+                // Hide pagination controls if there's only one page
+                if (controlsWrapper.length) { // Ensure wrapper exists
+                     controlsWrapper.toggle(pageInfo.pages > 1);
+                }
+            },
+
+            // Buttons Configuration (Export functionality)
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    text: '<span class="vscode-icons--file-type-pdf2"></span>', // Use Iconify span
+                    titleAttr: 'Export to PDF',                   // Tooltip
+                    title: function () { return getReportMetadata().title; },
+                    messageTop: function () { return getReportMetadata().message; },
+                    filename: function () {
+                        return `vulnerability-report-${getReportMetadata().safeName}`;
+                    },
+                    exportOptions: {
+                        // Specify columns to include by name (more robust than index)
+                        // Excludes control, Description, PURL, Related URLs from PDF
+                        columns: [
+                            'Name:name',
+                            'Version:name',
+                            'Type:name',
+                            'Vulnerability:name',
+                            'Severity:name',
+                            'State:name',
+                            'Fixed In:name'
+                        ]
+                    },
+                    customize: function (doc) {
+                        // PDF customization: left-align content, adjust widths
+                        doc.styles.tableHeader.alignment = 'left';
+                        doc.defaultStyle.alignment = 'left';
+                        // Relative widths: Name, Vuln, FixedIn get more space
+                        doc.content[doc.content.length - 1].table.widths = ['*', 'auto', 'auto', '*', 'auto', 'auto', '*'];
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<span class="vscode-icons--file-type-excel"></span>', // Use Iconify span
+                    titleAttr: 'Export to Excel',                    // Tooltip
+                    title: function () { return getReportMetadata().title; },
+                    messageTop: function () { return getReportMetadata().message; },
+                    filename: function () {
+                        return `vulnerability-report-${getReportMetadata().safeName}`;
+                    },
+                    exportOptions: {
+                        // Specify columns to include by name for Excel
+                        // Includes PURL and Related URLs in Excel export
+                         columns: [
+                            'Name:name',
+                            'Version:name',
+                            'Type:name',
+                            'Vulnerability:name',
+                            'Severity:name', 
+                            'State:name',
+                            'Fixed In:name',
+                            'Related URLs:name',
+                            'PURL:name'
+                        ]
+                    }
+                }
+            ]
+        });
+
+        // Setup the click handlers for the severity filter boxes
+        initSeverityFilteringDt(table);
+
+        // --- Resize Listener for Dynamic Page Length ---
+        // Create a debounced version of the page length calculation
+         const dtInstance = table; // Reference the table instance
+         const debouncedPageLengthHandler = debounce(function() {
+             // Ensure the DataTable instance still exists before calculating
+             if ($.fn.dataTable.isDataTable(tableElement)) {
+                setDynamicPageLengthDt(dtInstance);
+             }
+        }, 250); // Delay execution by 250ms after the last resize event
+
+        // Attach the debounced handler to the window resize event
+        window.addEventListener('resize', debouncedPageLengthHandler);
+    }
+
+    /**
+     * Defines the column configurations for the DataTables instance.
+     * Specifies properties like name, target index, visibility, searchability,
+     * rendering functions, cell creation callbacks, and responsive priority.
+     *
+     * @returns {Array<object>} An array of DataTables column definition objects.
+     */
+    function getColumnDefsDt() {
+        return [
+            // Column 0: Name
+            {
+                name: 'Name',
+                targets: 0,
+                searchable: true,
+                responsivePriority: 1
+            },
+            // Column 1: Version
+            {
+                name: 'Version',
+                targets: 1,
+                searchable: true,
+                responsivePriority: 5
+            },
+            // Column 2: Type
+            {
+                name: 'Type',
+                targets: 2,
+                render: function (data, type, row) { return data; },
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).html(formatTypeCell(cellData));
+                },
+                searchable: false,
+                responsivePriority: 6
+            },
+            // Column 3: Vulnerability ID
+            {
+                name: 'Vulnerability',
+                targets: 3,
+                searchable: true,
+                responsivePriority: 2
+            },
+            // Column 4: Severity
+            {
+                name: 'Severity',
+                targets: 4,
+                // Render raw data; formatting is handled by createdCell and renderChildRowDetails
+                render: function (data, type, row) { return data; },
+                // Apply pill formatting using helper function after cell is created
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).html(formatPill(cellData, 'severity'));
+                },
+                searchable: true,
+                responsivePriority: 3
+            },
+            // Column 5: State
+            {
+                name: 'State',
+                targets: 5,
+                 // Render raw data
+                render: function (data, type, row) { return data; },
+                 // Apply pill formatting using helper function after cell is created
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).html(formatPill(cellData, 'state'));
+                },
+                searchable: true,
+                responsivePriority: 4
+            },
+            // Column 7: Fixed In Version(s)
+            {
+                name: 'Fixed In',
+                targets: 6,
+                 // Add class to apply styling
+                createdCell: function (td, cellData, rowData, row, col) {
+                    $(td).addClass('fixed-in');
+                },
+                searchable: true,
+                responsivePriority: 7
+            },
+             // --- Columns initially hidden, shown in child row by default ---
+             // They are excluded from responsivity using className: 'none'
+            {
+                name: 'Description',
+                targets: 7,
+                searchable: true,
+                className: 'none', // Tell Responsive to hide this column initially
+            },
+            {
+                name: 'Related URLs',
+                targets: 8,
+                searchable: false,
+                className: 'none', // Tell Responsive to hide this column initially
+            },
+            {
+                name: 'PURL',
+                targets: 9,
+                searchable: false,
+                className: 'none', // Tell Responsive to hide this column initially
+            },
+        ];
+    }
+
+    /**
+     * Custom renderer function for DataTables Responsive extension.
+     * Generates the HTML content for the child row displayed when a row collapses.
+     * It iterates through the columns marked as 'hidden' by Responsive for the
+     * current row and formats their data appropriately (using helpers like
+     * formatPill and formatUrlList) before combining them into a single HTML block.
+     *
+     * @param {DataTables.Api} api - The DataTables API instance.
+     * @param {number} rowIndex - The index of the row being rendered.
+     * @param {Array<object>} columns - An array of column objects provided by Responsive,
+     *                                  indicating which columns are hidden ({columnIndex, title, hidden}).
+     * @returns {string|false} The HTML string for the child row content, or false if no content is generated.
+     */
+    function renderChildRowDetailsDt( api, rowIndex, columns ) {
+        // We will get data cell-by-cell using the correct API.
+        let finalHtml = '';
+
+        // Iterate through the column information provided by the Responsive extension
+        columns.forEach(function(col) {
+            // Only process columns that are currently hidden by Responsive for this specific row
+            if (col.hidden) {
+                const index = col.columnIndex; // Original index of the column (0-based)
+                const title = col.title;       // Column title (from <thead> or columnDefs name)
+                
+                // --- Use api.cell(rowIndex, columnIndex).data() for robust data retrieval ---
+                const data = api.cell(rowIndex, index).data();
+                
+                let contentHtml = ''; // HTML for this specific column's content
+
+                // Apply specific formatting based on the original column index
+                switch (index) {
+                    case 2: // Type
+                        contentHtml = formatTypeCell(data);
+                        break;
+                    case 4: // Severity
+                        contentHtml = formatPill(data, 'severity');
+                        break;
+                    case 5: // State
+                        contentHtml = formatPill(data, 'state');
+                        break;
+                     case 7: // Description
+                         // Ensure data exists before trying to format
+                         contentHtml = data ? String(data) : ''; 
+                         break;
+                    case 8: // Related URLs
+                        contentHtml = formatUrlList(data); // formatUrlList handles empty/invalid data
+                        break;
+                    default:
+                         // Check if data exists and is not null/undefined before displaying
+                         if (data !== null && data !== undefined) {
+                             contentHtml = String(data); // Convert to string just in case
+                         }
+                         break;
+                }
+
+                // Add the formatted content to the final HTML, wrapped in a div with a title
+                // Only add if contentHtml was actually generated (e.g., empty URLs or null data won't add a section)
+                if (contentHtml) {
+                    finalHtml += `<div class="child-row-details"><b>${title}</b><br>${contentHtml}</div>`;
+                }
+            }
+        });
+
+        // Return the generated HTML (if any content was added), otherwise false
+        // Returning false tells Responsive not to show a child row if there's nothing to display
+        return finalHtml ? finalHtml : false;
+    }
+
+    /**
+     * Attaches click handlers to the severity overview boxes.
+     * Clicking a box adds/removes its severity from the active filter set.
+     * Updates the DataTable to show rows matching *any* of the selected severities.
+     * Highlights the active severity boxes.
+     *
+     * @param {DataTables.Api} table - The DataTables API instance.
+     */
+    function initSeverityFilteringDt(table) {
+        let activeSeverityFilters = []; // Use an array to track multiple selections
+        const severityBoxes = $('.severity-box'); // Cache selector
+
+        severityBoxes.on('click', function () {
+            const clickedBox = $(this);
+            const severity = clickedBox.find('.severity-title').text().trim();
+            const severityIndex = activeSeverityFilters.indexOf(severity);
+
+            // Toggle severity in the active filter list
+            if (severityIndex > -1) {
+                // Severity is currently active, remove it
+                activeSeverityFilters.splice(severityIndex, 1);
+                clickedBox.removeClass('active');
+            } else {
+                // Severity is not active, add it
+                activeSeverityFilters.push(severity);
+                clickedBox.addClass('active');
+            }
+
+            // Clear any global search and previous column searches
+            table.search('').columns().search('');
+
+            // Apply the combined severity filter to column 5 (Severity)
+            if (activeSeverityFilters.length > 0) {
+                // Create a regex string like "^Critical$|^High$|^Medium$"
+                // This ensures exact matches for each selected severity
+                const filterRegex = activeSeverityFilters.map(sev => `^${sev}$`).join('|');
+                table.column(4).search(filterRegex, true, false); // Enable regex, disable smart search
+            } else {
+                // If no filters are active, clear the specific column search
+                table.column(4).search('');
+            }
+            
+            // Redraw the table to apply the filter changes
+            table.draw();
+        });
+    }
+
+    /**
+     * Calculates the optimal number of rows to display in the DataTable based on
+     * available viewport height and sets the table's page length accordingly.
+     * It subtracts the height of the table header, pagination controls, and a
+     * fixed buffer from the total viewport height to determine the space available
+     * for table rows. Ensures at least one row is shown if space permits.
+     *
+     * @param {DataTables.Api} table - The DataTables API instance for the table.
+     */
+    function setDynamicPageLengthDt(table) {
+        try {
+            const tableWrapper = table.table().container();
+            const tableBody = table.table().body();
+            const controls = $(tableWrapper).find('.dataTables_control')[0];
+
+            // If the table is not visible, don't calculate the page length
+            if (!tableWrapper || !tableBody || !tableBody.rows.length) {
+                return;
+            }
+
+            const firstRow = tableBody.rows[0];
+            const rowHeight = firstRow.offsetHeight;
+
+            // If the row height is not valid, don't calculate the page length
+            if (!rowHeight || rowHeight <= 0) {
+                return;
+            }
+
+            // Measure heights and positions
+            const controlsHeight = controls ? $(controls).outerHeight(true) : 0; // Height of pagination controls
+            const tableBodyTopOffset = tableBody.getBoundingClientRect().top; // Vertical position of the tbody relative to viewport
+            const verticalBuffer = 60; // Pixels to leave empty below the table for aesthetics
+
+            // Calculate available height for rows
+            const availableHeight = window.innerHeight - tableBodyTopOffset - controlsHeight - verticalBuffer;
+
+            // If there's not enough available height, don't calculate the page length
+            if (availableHeight <= 0) {
+                return;
+            }
+
+            // Calculate how many rows fit and ensure at least 1
+            const calculatedNumberOfRows = Math.floor(availableHeight / rowHeight);
+            const numberOfRowsToShow = Math.max(1, calculatedNumberOfRows);
+
+            // Apply the new page length only if it has changed
+            const currentPageLength = table.page.len();
+            if (currentPageLength !== numberOfRowsToShow) {
+                table.page.len(numberOfRowsToShow).draw(false);
+            }
+
+        } catch (error) {
+            console.error("Error calculating page length:", error);
+        }
+    }
+
+    // ================================================
+    // UI Formatting & Utility Helpers
+    // ================================================
+
+    /**
+     * Formats the original ISO timestamp from the #dateElement into a human-readable
+     * format (e.g., "Monday, January 1, 2024 at 12:00 PM") and displays it in
+     * the #prettyDateElement, hiding the original element.
+     */
+    function renderFormattedTimestamp() {
+        const originalDateElement = document.getElementById("dateElement");
+        const prettyDateElement = document.getElementById("prettyDateElement");
+
+        // Ensure both elements exist
+        if (!originalDateElement || !prettyDateElement) {
+            console.error("prettyTimestamp: Date elements not found.");
+            return;
+        }
+
+        const dateString = originalDateElement.textContent;
+        if (!dateString) {
+            console.warn("prettyTimestamp: Original date string is empty.");
+            // Optionally hide the pretty date element or show 'N/A'
+            prettyDateElement.textContent = 'N/A';
+            prettyDateElement.style.display = '';
+            originalDateElement.style.display = 'none';
+            return;
+        }
+
+        try {
+            const date = new Date(dateString);
+
+            // Check for invalid date
+            if (isNaN(date.getTime())) {
+                console.warn("prettyTimestamp: Invalid date string:", dateString);
+                prettyDateElement.textContent = 'Invalid Date';
+                prettyDateElement.style.display = '';
+                originalDateElement.style.display = 'none';
+                return;
+            }
+
+            // Format date to a more human-readable form
+            const formattedDate = date.toLocaleDateString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
+
+            const formattedTime = date.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+            });
+
+            // Update the content of the pretty date element
+            prettyDateElement.textContent = `${formattedDate} at ${formattedTime}`;
+
+            // Hide the original and show the pretty one
+            originalDateElement.style.display = 'none';
+            prettyDateElement.style.display = ''; // Reset to default (inline)
+
+        } catch (error) {
+             console.error("prettyTimestamp: Error formatting date:", error);
+             prettyDateElement.textContent = 'Error'; // Indicate an error occurred
+             prettyDateElement.style.display = '';
+             originalDateElement.style.display = 'none';
+        }
+    }
+
+    /**
+     * Extracts report metadata (title, name, type, checksum, date) from DOM elements.
+     * Formats the data for use in report exports (PDF, Excel messageTop) and
+     * generates a sanitized version of the name for use in filenames.
+     *
+     * @returns {object} An object containing report metadata:
+     *                   { title: string, message: string, name: string, safeName: string }
+     */
+    function getReportMetadata() {
+        // Query elements safely
+        const titleElem = document.querySelector('.report-title');
+        const nameElem = document.getElementById('nameValue');
+        const typeElem = document.getElementById('typeValue');
+        const checksumElem = document.getElementById('checksumValue');
+        const dateElem = document.getElementById('prettyDateElement');
+
+        // Extract text content with fallbacks
+        const title = titleElem ? titleElem.textContent.trim() : 'Vulnerability Report';
+        const name = nameElem ? nameElem.textContent.trim() : 'N/A';
+        const type = typeElem ? typeElem.textContent.trim() : 'N/A';
+        const checksum = checksumElem ? checksumElem.textContent.trim() : 'N/A';
+        const dateText = dateElem ? dateElem.textContent.trim() : 'N/A';
+
+        // Sanitize the name for use as a filename (allow letters, numbers, ., _, -)
+        const safeName = name.replace(/[^a-z0-9._-]+/gi, '_').replace(/_+/g, '_');
+
+        // Construct the message string for export headers
+        let message = `Name: ${name}\n`;
+        message += `Type: ${type}\n`;
+        if (checksumElem && checksum !== 'N/A') {
+            message += `Checksum: ${checksum}\n`;
+        }
+        message += `Date: ${dateText}\n\n`;
+
+        return {
+            title,    // Report title
+            message,  // Formatted multi-line message for export header
+            name,     // Original name
+            safeName  // Sanitized name for filename
+        };
+    }
+
+    /**
+     * Generates HTML for a styled "pill" element used to display Severity or State.
+     * Applies appropriate CSS classes based on the data value and type.
+     *
+     * @param {string} data - The data value (e.g., "Critical", "fixed").
+     * @param {string} type - The type of pill ('severity' or 'state').
+     * @returns {string} HTML string for the styled span element.
+     */
+    function formatPill(data, type) {
+        // Define mappings from data values to CSS classes
+        const severityClasses = {'Critical': 'critical','High': 'high','Medium': 'medium','Low': 'low','Unknown': 'unknown'};
+        const stateClasses = {'fixed': 'fixed','not-fixed': 'not-fixed','unknown': 'unknown','wont-fix': 'wont-fix'};
+
+        let baseClass = '';
+        let specificClass = '';
+        let text = data || 'Unknown'; // Use 'Unknown' as default text if data is falsy
+
+        // Determine base class and specific class based on type
+        if (type === 'severity') {
+            baseClass = 'severity-pill';
+            // Use provided data, fallback to 'Unknown' class if data is not in map
+            specificClass = severityClasses[data] || 'unknown';
+        } else if (type === 'state') {
+            baseClass = 'state-pill';
+             // Normalize state data to lower case for matching, fallback to 'unknown' class
+            specificClass = stateClasses[String(data).toLowerCase()] || 'unknown';
+        } else {
+            // If type is unknown, return the raw text without formatting
+             console.warn(`formatPill: Unknown type "${type}" for data "${data}"`);
+            return text;
+        }
+
+        // Construct and return the HTML span element
+        // Use text content that was determined (might be 'Unknown')
+        return `<span class="${baseClass} ${specificClass}">${text}</span>`;
+    }
+
+    /**
+     * Parses a JSON string containing an array of URLs and formats them
+     * into an HTML unordered list (<ul>). Handles potential JSON parsing errors.
+     * URLs starting with 'http' are made into clickable links. Other strings
+     * are displayed as plain text list items.
+     *
+     * @param {string} data - A JSON string representing an array of URLs/strings, or null/undefined.
+     * @returns {string} An HTML string containing the <ul> list, or an empty string if no valid URLs are found or parsing fails.
+     */
+    function formatUrlList(data) {
+        let urls = [];
+        // Safely parse the JSON data
+        try {
+            // Only attempt parsing if data is a non-empty string
+            if (data && typeof data === 'string') {
+                urls = JSON.parse(data);
+            }
+        } catch (error) {
+            console.error("Failed to parse Related URLs JSON:", data, error);
+            urls = []; // Ensure urls is an array on error
+        }
+
+        let listHtml = '';
+        // Ensure urls is an array before proceeding
+        if (Array.isArray(urls) && urls.length > 0) {
+            listHtml += '<ul>';
+            urls.forEach(url => {
+                // Check if the item is a valid, non-empty string
+                if (url && typeof url === 'string') {
+                     // Check if it looks like a clickable URL
+                    if (url.startsWith('http://') || url.startsWith('https://')) {
+                        // Create a link, escaping URL for safety (though usually fine here)
+                        // Add rel="noopener noreferrer" for security when using target="_blank"
+                        listHtml += `<li><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></li>`;
+                    } else {
+                        // Display other strings as plain text list items
+                        listHtml += `<li>${url}</li>`;
+                    }
+                }
+            });
+            listHtml += '</ul>';
+        }
+        return listHtml;
+    }
+
+    /**
+     * Returns a function, that, as long as it continues to be invoked, will not
+     * be triggered. The function will be called after it stops being called for
+     * N milliseconds. If `immediate` is passed, trigger the function on the
+     * leading edge, instead of the trailing.
+     *
+     * @param {Function} func - The function to debounce.
+     * @param {number} wait - The number of milliseconds to delay.
+     * @param {boolean} [immediate=false] - Trigger the function on the leading edge.
+     * @returns {Function} The debounced function.
+     */
+    function debounce(func, wait, immediate = false) {
+        let timeout;
+
+        return function executedFunction() {
+            const context = this;
+            const args = arguments;
+
+            const later = function() {
+                timeout = null;
+                if (!immediate) {
+                    func.apply(context, args);
+                }
+            };
+
+            const callNow = immediate && !timeout;
+
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+
+            if (callNow) {
+                func.apply(context, args);
+            }
+        };
+    };
+
+    /**
+    * Icon mapping for different package types.
+    * Uses Devicon classes where available, otherwise a fallback span.
+    */
+    const packageTypeIcons = {
+        'alpm': { type: 'icon', class: 'devicon-archlinux-plain colored' },
+        'apk': { type: 'fallback', class: 'iconify-file-icons--alpine-linux' },
+        'cocoapods': { type: 'icon', class: 'devicon-apple-original colored' },
+        'composer': { type: 'icon', class: 'devicon-composer-line colored' },
+        'conan': { type: 'icon', class: 'devicon-cplusplus-plain' },
+        'deb': { type: 'icon', class: 'devicon-debian-plain colored' },
+        'dotnet': { type: 'icon', class: 'devicon-dotnetcore-plain colored' },
+        'gem': { type: 'icon', class: 'devicon-ruby-plain colored' },
+        'go-module': { type: 'icon', class: 'devicon-go-original-wordmark colored' },
+        'haskell': { type: 'icon', class: 'devicon-haskell-plain colored' },
+        'hex': { type: 'icon', class: 'devicon-elixir-plain colored' },
+        'java': { type: 'icon', class: 'devicon-java-plain colored' },
+        'jenkins-plugin': { type: 'icon', class: 'devicon-jenkins-line' },
+        'linux-kernel-module': { type: 'icon', class: 'devicon-linux-plain colored' },
+        'lua': { type: 'icon', class: 'devicon-lua-plain colored' },
+        'npm': { type: 'icon', class: 'devicon-npm-original-wordmark colored' },
+        'nix': { type: 'icon', class: 'devicon-nixos-plain colored' },
+        'portage': { type: 'icon', class: 'devicon-gentoo-plain colored' },
+        'pub': { type: 'icon', class: 'devicon-dart-plain colored' },
+        'python': { type: 'icon', class: 'devicon-python-plain colored' },
+        'rpm': { type: 'icon', class: 'devicon-redhat-plain colored' },
+        'rust-crate': { type: 'icon', class: 'devicon-rust-plain colored' },
+        'swift': { type: 'icon', class: 'devicon-swift-plain colored' },
+        'wordpress-plugin': { type: 'icon', class: 'devicon-wordpress-plain colored' },
+        'github-action': { type: 'icon', class: 'devicon-github-original colored' },
+        'binary': { type: 'fallback', class: 'iconify-noto--package' },
+        'buildroot': { type: 'fallback', class: 'iconify-noto--package' },
+        'graalvm-native-image': { type: 'fallback', class: 'iconify-noto--package' },
+        'kb': { type: 'icon', class: 'devicon-windows11-original colored' },
+        // Fallback for unknown types will be handled in formatTypeCell
+    };
+
+    /**
+     * Generates HTML for a package type cell, including an icon.
+     *
+     * @param {string} data - The package type string (e.g., "java", "npm").
+     * @returns {string} HTML string for the formatted cell content.
+     */
+    function formatTypeCell(data) {
+        const typeKey = data ? String(data).toLowerCase() : 'unknown'; // Normalize key
+        const iconInfo = packageTypeIcons[typeKey];
+        const fallbackInfo = { type: 'fallback', class: 'noto--package' };
+        const chosenInfo = iconInfo || fallbackInfo;
+
+        let iconHtml = '';
+        if (chosenInfo.type === 'icon') {
+            iconHtml = `<i class="${chosenInfo.class}"></i>`;
+        } else { // fallback
+            iconHtml = `<span class="icon-span ${chosenInfo.class}"></span>`;
+        }
+
+        return `<span class="pkg-type-cell">${iconHtml}<span>${data}</span></span>`;
+    }
+
+    // ================================================
+    // Main Execution
+    // ================================================
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Update the browser page title dynamically using report name
+        const headerInfo = getReportMetadata();
+        if (headerInfo && headerInfo.safeName && headerInfo.safeName !== 'N_A') {
+            document.title = `Vulnerability Report (${headerInfo.safeName})`;
+        } else {
+            document.title = `Vulnerability Report`;
+        }
+
+        // 2. Format the timestamp in the header
+        renderFormattedTimestamp();
+
+        // 3. Initialize the main DataTable
+        initDataTable();
+        
+    });
+
+
+
+    </script>
+
+</body>
+
+</html>
